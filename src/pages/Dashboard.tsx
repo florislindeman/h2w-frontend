@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import UploadModal from './UploadModal';
 import './Dashboard.css';
+
 const API_URL = import.meta.env.VITE_API_URL || 'https://h2wchatbot-production.up.railway.app';
+
 interface Document {
   id: string;
   title: string;
@@ -86,6 +89,10 @@ export default function Dashboard() {
     navigate('/');
   };
 
+  const handleUploadSuccess = () => {
+    fetchDocuments(); // Refresh document list
+  };
+
   const getFileIcon = (fileType: string) => {
     const icons: Record<string, string> = {
       pdf: '📄',
@@ -145,7 +152,7 @@ export default function Dashboard() {
             <h1 className="page-title">Knowledge Base</h1>
             <p className="page-subtitle">Ask questions about your documents</p>
           </div>
-          <button onClick={() => setShowUpload(!showUpload)} className="btn-upload">
+          <button onClick={() => setShowUpload(true)} className="btn-upload">
             <svg viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
             </svg>
@@ -275,6 +282,13 @@ export default function Dashboard() {
           </div>
         </section>
       </main>
+
+      {/* Upload Modal */}
+      <UploadModal
+        isOpen={showUpload}
+        onClose={() => setShowUpload(false)}
+        onUploadSuccess={handleUploadSuccess}
+      />
     </div>
   );
 }
