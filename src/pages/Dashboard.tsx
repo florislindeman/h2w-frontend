@@ -35,7 +35,7 @@ export default function Dashboard() {
   const fetchDocuments = async () => {
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/documents/my-documents`, {
+      const response = await fetch(`${API_URL}/documents/my-documents`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
@@ -53,7 +53,7 @@ export default function Dashboard() {
     const token = localStorage.getItem('token');
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/chat/ask`, {
+      const response = await fetch(`${API_URL}/chat/ask`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
