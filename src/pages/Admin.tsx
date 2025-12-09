@@ -49,7 +49,12 @@ export default function Admin() {
 
   useEffect(() => {
     // Check if user is admin
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const userStr = localStorage.getItem('user');
+if (!userStr) {
+  navigate('/dashboard');
+  return;
+}
+const user = JSON.parse(userStr);
     if (user.role !== 'admin') {
       navigate('/dashboard');
       return;
