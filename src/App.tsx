@@ -1,36 +1,42 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
-import './global.css';
+import Admin from './pages/Admin';
 
 function App() {
-  // Check if user is authenticated
-  const isAuthenticated = (): boolean => {
-    const token = localStorage.getItem('token');
-    return token !== null;
+  const isAuthenticated = () => {
+    return !!localStorage.getItem('token');
   };
 
-  // Protected Route wrapper
+  const isAdmin = () => {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    return user.role === 'admin';
+  };
+
   const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-    return isAuthenticated() ? <>{children}</> : <Navigate to="/" replace />;
+    if (!isAuthenticated()) {
+      return <Navigate to="/" replace />;
+    }
+    return <>{children}</>;
+  };
+
+  const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+    if (!isAuthenticated()) {
+      return <Navigate to="/" replace />;
+    }
+    if (!isAdmin()) {
+      return <Navigate to="/dashboard" replace />;
+    }
+    return <>{children}</>;
   };
 
   return (
     <BrowserRouter>
       <Routes>
-        {/* Login Route */}
         <Route 
           path="/" 
-          element={
-            isAuthenticated() ? (
-              <Navigate to="/dashboard" replace />
-            ) : (
-              <Login />
-            )
-          } 
+          element={isAuthenticated() ? <Navigate to="/dashboard" replace /> : <Login />} 
         />
-
-        {/* Dashboard Route (Protected) */}
         <Route 
           path="/dashboard" 
           element={
@@ -39,9 +45,14 @@ function App() {
             </ProtectedRoute>
           } 
         />
-
-        {/* Catch all - redirect to home */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route 
+          path="/admin" 
+          element={
+            <AdminRoute>
+              <Admin />
+            </AdminRoute>
+          } 
+        />
       </Routes>
     </BrowserRouter>
   );
