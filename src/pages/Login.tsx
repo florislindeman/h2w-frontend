@@ -30,6 +30,11 @@ const response = await fetch(`${API_URL}/auth/login`, {
 
       if (response.ok) {
         localStorage.setItem('token', data.access_token);
+        localStorage.setItem('token', data.access_token);
+localStorage.setItem('user', JSON.stringify({ 
+  email: email, 
+  role: data.role || 'user' 
+})); // NIEUWE REGEL
         localStorage.setItem('user', JSON.stringify(data.user));
         navigate('/dashboard');
       } else {
