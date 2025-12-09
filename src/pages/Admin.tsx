@@ -46,29 +46,25 @@ export default function Admin() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [newCategory, setNewCategory] = useState({ name: '', description: '' });
+  const [showCreateUserModal, setShowCreateUserModal] = useState(false);
+  const [newUser, setNewUser] = useState({ 
+    email: '', 
+    password: '', 
+    full_name: '', 
+    role: 'user',
+    category_ids: [] as string[]
+  });
 
- useEffect(() => {
-  // Check if user is admin
-  const userStr = localStorage.getItem('user');
-  if (!userStr) {
-    navigate('/dashboard');
-    return;
-  }
-  
-  try {
-    const user = JSON.parse(userStr);
+  useEffect(() => {
+    // Check if user is admin
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
     if (user.role !== 'admin') {
       navigate('/dashboard');
       return;
     }
-  } catch (e) {
-    console.error('Failed to parse user:', e);
-    navigate('/dashboard');
-    return;
-  }
-  
-  fetchData();
-}, [navigate]);
+    
+    fetchData();
+  }, [navigate]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -179,6 +175,40 @@ export default function Admin() {
     }
   };
 
+  const handleCreateUser = async () => {
+    if (!newUser.email.trim() || !newUser.password.trim() || !newUser.full_name.trim()) {
+      alert('Please fill in all required fields');
+      return;
+    }
+    
+    const token = localStorage.getItem('token');
+    try {
+      const response = await fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(newUser),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        alert(error.detail || 'Failed to create user');
+        return;
+      }
+      
+      const data = await response.json();
+      setUsers([...users, data]);
+      setNewUser({ email: '', password: '', full_name: '', role: 'user', category_ids: [] });
+      setShowCreateUserModal(false);
+      fetchData(); // Refresh to get updated data
+    } catch (error) {
+      console.error('Error creating user:', error);
+      alert('Failed to create user');
+    }
+  };
+
   const getFileIcon = (fileType: string) => {
     const icons: Record<string, string> = {
       pdf: '📄',
@@ -272,6 +302,14 @@ export default function Admin() {
               {activeTab === 'categories' && 'Organize content with categories'}
             </p>
           </div>
+          {activeTab === 'users' && (
+            <button onClick={() => setShowCreateUserModal(true)} className="btn-primary">
+              <svg viewBox="0 0 20 20" fill="currentColor">
+                <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z" />
+              </svg>
+              New User
+            </button>
+          )}
           {activeTab === 'categories' && (
             <button onClick={() => setShowCategoryModal(true)} className="btn-primary">
               <svg viewBox="0 0 20 20" fill="currentColor">
@@ -538,6 +576,99 @@ export default function Admin() {
             <div className="modal-footer">
               <button className="btn-secondary" onClick={() => setShowCategoryModal(false)}>Cancel</button>
               <button className="btn-primary" onClick={handleCreateCategory}>Create Category</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create User Modal */}
+      {showCreateUserModal && (
+        <div className="modal-overlay" onClick={() => setShowCreateUserModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2 className="modal-title">Create New User</h2>
+              <button className="modal-close" onClick={() => setShowCreateUserModal(false)}>
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+            <div className="modal-body">
+              <div className="form-group">
+                <label className="form-label">Full Name *</label>
+                <input
+                  type="text"
+                  value={newUser.full_name}
+                  onChange={(e) => setNewUser({ ...newUser, full_name: e.target.value })}
+                  placeholder="John Doe"
+                  className="form-input"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Email *</label>
+                <input
+                  type="email"
+                  value={newUser.email}
+                  onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                  placeholder="john@example.com"
+                  className="form-input"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Password *</label>
+                <input
+                  type="password"
+                  value={newUser.password}
+                  onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                  placeholder="••••••••"
+                  className="form-input"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Role</label>
+                <select
+                  value={newUser.role}
+                  onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+                  className="form-input"
+                >
+                  <option value="user">User</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Assign Categories</label>
+                <div className="checkbox-group">
+                  {categories.map((category) => (
+                    <label key={category.id} className="checkbox-label">
+                      <input
+                        type="checkbox"
+                        checked={newUser.category_ids.includes(category.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setNewUser({ 
+                              ...newUser, 
+                              category_ids: [...newUser.category_ids, category.id] 
+                            });
+                          } else {
+                            setNewUser({ 
+                              ...newUser, 
+                              category_ids: newUser.category_ids.filter(id => id !== category.id) 
+                            });
+                          }
+                        }}
+                      />
+                      <span>{category.name}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn-secondary" onClick={() => setShowCreateUserModal(false)}>Cancel</button>
+              <button className="btn-primary" onClick={handleCreateUser}>Create User</button>
             </div>
           </div>
         </div>
