@@ -35,7 +35,6 @@ localStorage.setItem('user', JSON.stringify({
   email: data.email,
   role: data.role || 'user' 
 }));
-})); // NIEUWE REGEL
         localStorage.setItem('user', JSON.stringify(data.user));
         navigate('/dashboard');
       } else {
