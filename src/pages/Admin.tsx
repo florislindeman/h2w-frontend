@@ -47,21 +47,28 @@ export default function Admin() {
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [newCategory, setNewCategory] = useState({ name: '', description: '' });
 
-  useEffect(() => {
-    // Check if user is admin
-    const userStr = localStorage.getItem('user');
-if (!userStr) {
-  navigate('/dashboard');
-  return;
-}
-const user = JSON.parse(userStr);
+ useEffect(() => {
+  // Check if user is admin
+  const userStr = localStorage.getItem('user');
+  if (!userStr) {
+    navigate('/dashboard');
+    return;
+  }
+  
+  try {
+    const user = JSON.parse(userStr);
     if (user.role !== 'admin') {
       navigate('/dashboard');
       return;
     }
-    
-    fetchData();
-  }, [navigate]);
+  } catch (e) {
+    console.error('Failed to parse user:', e);
+    navigate('/dashboard');
+    return;
+  }
+  
+  fetchData();
+}, [navigate]);
 
   const fetchData = async () => {
     setLoading(true);
