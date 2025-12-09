@@ -32,7 +32,7 @@ const response = await fetch(`${API_URL}/auth/login`, {
         localStorage.setItem('token', data.access_token);
         localStorage.setItem('token', data.access_token);
 localStorage.setItem('user', JSON.stringify({ 
-  email: data.email || formData.email,
+  email: data.email,
   role: data.role || 'user' 
 }));
 })); // NIEUWE REGEL
