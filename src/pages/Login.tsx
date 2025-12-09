@@ -20,7 +20,7 @@ export default function Login() {
 
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'https://h2wchatbot-production.up.railway.app';
-const response = await fetch(`${API_URL}/auth/login`, {
+      const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
@@ -30,12 +30,10 @@ const response = await fetch(`${API_URL}/auth/login`, {
 
       if (response.ok) {
         localStorage.setItem('token', data.access_token);
-        localStorage.setItem('token', data.access_token);
-localStorage.setItem('user', JSON.stringify({ 
-  email: data.email,
-  role: data.role || 'user' 
-}));
-        localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem('user', JSON.stringify({ 
+          email: data.email,
+          role: data.role || 'user' 
+        }));
         navigate('/dashboard');
       } else {
         setError(data.detail || 'Login failed');
