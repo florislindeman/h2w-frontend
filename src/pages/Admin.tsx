@@ -48,12 +48,13 @@ export default function Admin() {
   const [newCategory, setNewCategory] = useState({ name: '', description: '' });
   const [showCreateUserModal, setShowCreateUserModal] = useState(false);
   const [newUser, setNewUser] = useState({ 
-    email: '', 
-    password: '', 
-    full_name: '', 
-    role: 'user',
-    category_ids: [] as string[]
-  });
+  email: '', 
+  password: '', 
+  full_name: '', 
+  role: 'medewerker',
+  department_id: null,
+  category_ids: [] as string[]
+});
 
   useEffect(() => {
     // Check if user is admin
@@ -628,17 +629,18 @@ export default function Admin() {
                   required
                 />
               </div>
-              <div className="form-group">
-                <label className="form-label">Role</label>
-                <select
-                  value={newUser.role}
-                  onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
-                  className="form-input"
-                >
-                  <option value="user">User</option>
-                  <option value="admin">Admin</option>
-                </select>
-              </div>
+            <div className="form-group">
+  <label className="form-label">Role</label>
+  <select
+    value={newUser.role}
+    onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+    className="form-input"
+  >
+    <option value="medewerker">Medewerker</option>
+    <option value="manager">Manager</option>
+    <option value="admin">Admin</option>
+  </select>
+</div>
               <div className="form-group">
                 <label className="form-label">Assign Categories</label>
                 <div className="checkbox-group">
