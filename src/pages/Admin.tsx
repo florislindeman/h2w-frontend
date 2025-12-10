@@ -632,15 +632,15 @@ export default function Admin() {
               </div>
             <div className="form-group">
   <label className="form-label">Role</label>
-  <select
-    value={newUser.role}
-    onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
-    className="form-input"
-  >
-    <option value="medewerker">Medewerker</option>
-    <option value="manager">Manager</option>
-    <option value="admin">Admin</option>
-  </select>
+ <select
+  value={newUser.role}
+  onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+  className="form-input"
+>
+  <option value="medewerker">Medewerker</option>
+  <option value="manager">Manager</option>
+  <option value="admin">Admin</option>
+</select>
 </div>
               <div className="form-group">
                 <label className="form-label">Assign Categories</label>
