@@ -176,38 +176,39 @@ export default function Admin() {
   };
 
   const handleCreateUser = async () => {
-    if (!newUser.email.trim() || !newUser.password.trim() || !newUser.full_name.trim()) {
-      alert('Please fill in all required fields');
+  if (!newUser.email.trim() || !newUser.password.trim() || !newUser.full_name.trim()) {
+    alert('Please fill in all required fields');
+    return;
+  }
+  
+  const token = localStorage.getItem('token');
+  try {
+    const response = await fetch(`${API_URL}/auth/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(newUser),
+    });
+    
+    const data = await response.json();
+    
+    if (!response.ok) {
+      console.error('Error response:', data);
+      alert(data.detail || JSON.stringify(data));
       return;
     }
     
-    const token = localStorage.getItem('token');
-    try {
-      const response = await fetch(`${API_URL}/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(newUser),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        alert(error.detail || 'Failed to create user');
-        return;
-      }
-      
-      const data = await response.json();
-      setUsers([...users, data]);
-      setNewUser({ email: '', password: '', full_name: '', role: 'user', category_ids: [] });
-      setShowCreateUserModal(false);
-      fetchData(); // Refresh to get updated data
-    } catch (error) {
-      console.error('Error creating user:', error);
-      alert('Failed to create user');
-    }
-  };
+    setUsers([...users, data]);
+    setNewUser({ email: '', password: '', full_name: '', role: 'user', category_ids: [] });
+    setShowCreateUserModal(false);
+    fetchData(); // Refresh to get updated data
+  } catch (error) {
+    console.error('Error creating user:', error);
+    alert('Network error: ' + error);
+  }
+};
 
   const getFileIcon = (fileType: string) => {
     const icons: Record<string, string> = {
