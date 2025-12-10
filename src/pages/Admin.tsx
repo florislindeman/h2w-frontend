@@ -418,14 +418,15 @@ export default function Admin() {
                         </td>
                         <td>{user.email}</td>
                         <td>
-                          <select 
-                            value={user.role} 
-                            onChange={(e) => handleUpdateUserRole(user.id, e.target.value)}
-                            className="role-select"
-                          >
-                            <option value="user">User</option>
-                            <option value="admin">Admin</option>
-                          </select>
+                        <select 
+  value={user.role} 
+  onChange={(e) => handleUpdateUserRole(user.id, e.target.value)}
+  className="role-select"
+>
+  <option value="medewerker">Medewerker</option>
+  <option value="manager">Manager</option>
+  <option value="admin">Admin</option>
+</select>
                         </td>
                         <td>
                           <div className="category-pills">
