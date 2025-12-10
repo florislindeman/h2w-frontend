@@ -202,7 +202,7 @@ export default function Admin() {
     }
     
     setUsers([...users, data]);
-    setNewUser({ email: '', password: '', full_name: '', role: 'user', category_ids: [] });
+setNewUser({ email: '', password: '', full_name: '', role: 'medewerker', department_id: null, category_ids: [] });
     setShowCreateUserModal(false);
     fetchData(); // Refresh to get updated data
   } catch (error) {
