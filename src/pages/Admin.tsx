@@ -116,21 +116,39 @@ export default function Admin() {
     try {
       // Fetch documents
       const docsRes = await fetch(`${API_URL}/documents/`, {
-        headers: { Authorization: `Bearer ${token}` },
+        method: 'GET',
+        mode: 'cors',
+        credentials: 'include',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
       });
       const docsData = await docsRes.json();
       setDocuments(docsData);
 
       // Fetch users
       const usersRes = await fetch(`${API_URL}/users/`, {
-        headers: { Authorization: `Bearer ${token}` },
+        method: 'GET',
+        mode: 'cors',
+        credentials: 'include',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
       });
       const usersData = await usersRes.json();
       setUsers(usersData);
 
       // Fetch categories
       const catsRes = await fetch(`${API_URL}/categories/`, {
-        headers: { Authorization: `Bearer ${token}` },
+        method: 'GET',
+        mode: 'cors',
+        credentials: 'include',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
       });
       const catsData = await catsRes.json();
       setCategories(catsData);
@@ -149,7 +167,12 @@ export default function Admin() {
     try {
       await fetch(`${API_URL}/documents/${docId}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
+        mode: 'cors',
+        credentials: 'include',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
       });
       setDocuments(documents.filter(d => d.id !== docId));
       setShowDeleteModal(false);
@@ -167,7 +190,12 @@ export default function Admin() {
     try {
       await fetch(`${API_URL}/users/${userId}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
+        mode: 'cors',
+        credentials: 'include',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
       });
       setUsers(users.filter(u => u.id !== userId));
       setShowDeleteModal(false);
@@ -185,7 +213,12 @@ export default function Admin() {
     try {
       const response = await fetch(`${API_URL}/categories/${categoryId}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
+        mode: 'cors',
+        credentials: 'include',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
       });
       
       if (!response.ok) {
@@ -220,9 +253,11 @@ export default function Admin() {
     try {
       await fetch(`${API_URL}/users/${userId}`, {
         method: 'PUT',
+        mode: 'cors',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ role: newRole }),
       });
@@ -240,9 +275,11 @@ export default function Admin() {
     try {
       await fetch(`${API_URL}/users/${userId}`, {
         method: 'PUT',
+        mode: 'cors',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ category_ids: categoryIds }),
       });
@@ -261,22 +298,42 @@ export default function Admin() {
     if (!selectedDoc) return;
     
     const token = localStorage.getItem('token');
+    console.log('[AUDIT] Attempting to update document categories:', {
+      documentId: selectedDoc.id,
+      categoryIds: docCategoryIds,
+      url: `${API_URL}/documents/${selectedDoc.id}`
+    });
+    
     try {
-      await fetch(`${API_URL}/documents/${selectedDoc.id}`, {
+      const response = await fetch(`${API_URL}/documents/${selectedDoc.id}`, {
         method: 'PUT',
+        mode: 'cors',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ category_ids: docCategoryIds }),
       });
-      fetchData();
+      
+      console.log('[AUDIT] Response status:', response.status);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('[AUDIT] Error response:', errorData);
+        throw new Error(errorData.detail || 'Failed to update document categories');
+      }
+      
+      const result = await response.json();
+      console.log('[AUDIT] Success response:', result);
+      
+      await fetchData();
       setShowEditDocModal(false);
       setSelectedDoc(null);
       addAuditLog('UPDATE_DOC_CATEGORIES', `Updated categories for document: ${selectedDoc.title}`);
     } catch (error) {
-      console.error('Error updating document categories:', error);
-      alert('Failed to update document categories');
+      console.error('[AUDIT] Error updating document categories:', error);
+      alert(`Failed to update document categories: ${error}`);
       addAuditLog('ERROR', `Failed to update document categories: ${error}`);
     }
   };
@@ -288,9 +345,11 @@ export default function Admin() {
     try {
       const response = await fetch(`${API_URL}/categories/`, {
         method: 'POST',
+        mode: 'cors',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(newCategory),
       });
@@ -316,9 +375,11 @@ export default function Admin() {
     try {
       const response = await fetch(`${API_URL}/auth/register`, {
         method: 'POST',
+        mode: 'cors',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(newUser),
       });
