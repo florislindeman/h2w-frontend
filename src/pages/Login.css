@@ -188,6 +188,7 @@
   position: relative;
   display: flex;
   align-items: center;
+  width: 100%;
 }
 
 .input-icon {
@@ -195,7 +196,7 @@
   left: 16px;
   width: 20px;
   height: 20px;
-  color: #a0aec0;
+  color: #667eea;
   pointer-events: none;
   z-index: 10;
 }
@@ -206,10 +207,12 @@
   font-size: 15px;
   border: 2px solid #e2e8f0;
   border-radius: 12px;
-  background: white;
+  background: rgba(255, 255, 255, 0.95);
   color: #2d3748;
   transition: all 0.2s ease;
   font-family: inherit;
+  position: relative;
+  z-index: 5;
 }
 
 .form-input:hover {
