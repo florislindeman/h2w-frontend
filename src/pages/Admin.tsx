@@ -48,13 +48,13 @@ export default function Admin() {
   const [newCategory, setNewCategory] = useState({ name: '', description: '' });
   const [showCreateUserModal, setShowCreateUserModal] = useState(false);
   const [newUser, setNewUser] = useState({ 
-  email: '', 
-  password: '', 
-  full_name: '', 
-  role: 'medewerker',
-  department_id: null,
-  category_ids: [] as string[]
-});
+    email: '', 
+    password: '', 
+    full_name: '', 
+    role: 'medewerker',
+    department_id: null as string | null,
+    category_ids: [] as string[]
+  });
 
   useEffect(() => {
     // Check if user is admin
@@ -177,39 +177,38 @@ export default function Admin() {
   };
 
   const handleCreateUser = async () => {
-  if (!newUser.email.trim() || !newUser.password.trim() || !newUser.full_name.trim()) {
-    alert('Please fill in all required fields');
-    return;
-  }
-  
-  const token = localStorage.getItem('token');
-  try {
-    const response = await fetch(`${API_URL}/auth/register`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(newUser),
-    });
-    
-    const data = await response.json();
-    
-    if (!response.ok) {
-      console.error('Error response:', data);
-      alert(data.detail || JSON.stringify(data));
+    if (!newUser.email.trim() || !newUser.password.trim() || !newUser.full_name.trim()) {
+      alert('Please fill in all required fields');
       return;
     }
     
-    setUsers([...users, data]);
-setNewUser({ email: '', password: '', full_name: '', role: 'medewerker', department_id: null, category_ids: [] });
-    setShowCreateUserModal(false);
-    fetchData(); // Refresh to get updated data
-  } catch (error) {
-    console.error('Error creating user:', error);
-    alert('Network error: ' + error);
-  }
-};
+    const token = localStorage.getItem('token');
+    try {
+      const response = await fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(newUser),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        alert(error.detail || 'Failed to create user');
+        return;
+      }
+      
+      const data = await response.json();
+      setUsers([...users, data]);
+      setNewUser({ email: '', password: '', full_name: '', role: 'medewerker', department_id: null, category_ids: [] });
+      setShowCreateUserModal(false);
+      fetchData(); // Refresh to get updated data
+    } catch (error) {
+      console.error('Error creating user:', error);
+      alert('Failed to create user');
+    }
+  };
 
   const getFileIcon = (fileType: string) => {
     const icons: Record<string, string> = {
@@ -418,15 +417,14 @@ setNewUser({ email: '', password: '', full_name: '', role: 'medewerker', departm
                         </td>
                         <td>{user.email}</td>
                         <td>
-                        <select 
-  value={user.role} 
-  onChange={(e) => handleUpdateUserRole(user.id, e.target.value)}
-  className="role-select"
->
-  <option value="medewerker">Medewerker</option>
-  <option value="manager">Manager</option>
-  <option value="admin">Admin</option>
-</select>
+                          <select 
+                            value={user.role} 
+                            onChange={(e) => handleUpdateUserRole(user.id, e.target.value)}
+                            className="role-select"
+                          >
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                          </select>
                         </td>
                         <td>
                           <div className="category-pills">
@@ -630,18 +628,17 @@ setNewUser({ email: '', password: '', full_name: '', role: 'medewerker', departm
                   required
                 />
               </div>
-            <div className="form-group">
-  <label className="form-label">Role</label>
- <select
-  value={newUser.role}
-  onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
-  className="form-input"
->
-  <option value="medewerker">Medewerker</option>
-  <option value="manager">Manager</option>
-  <option value="admin">Admin</option>
-</select>
-</div>
+              <div className="form-group">
+                <label className="form-label">Role</label>
+                <select
+                  value={newUser.role}
+                  onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+                  className="form-input"
+                >
+                  <option value="user">User</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
               <div className="form-group">
                 <label className="form-label">Assign Categories</label>
                 <div className="checkbox-group">
