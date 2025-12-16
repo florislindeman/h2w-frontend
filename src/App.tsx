@@ -3,24 +3,26 @@ import Login from './pages/Login';
 import UserDashboard from './pages/UserDashboard';
 import Admin from './pages/Admin';
 
-// Route Guards
+// Route Guard Component
 function ProtectedRoute({ children, allowedRoles }: { children: React.ReactNode, allowedRoles?: string[] }) {
   const token = localStorage.getItem('token');
   const userStr = localStorage.getItem('user');
 
+  // Not authenticated
   if (!token || !userStr) {
     return <Navigate to="/login" replace />;
   }
 
+  // Check role if specific roles are required
   if (allowedRoles) {
     try {
       const user = JSON.parse(userStr);
       if (!allowedRoles.includes(user.role)) {
-        // If admin tries to access user dashboard, redirect to admin
+        // Admin trying to access user dashboard
         if (user.role === 'admin' && allowedRoles.includes('medewerker')) {
           return <Navigate to="/admin" replace />;
         }
-        // If user tries to access admin, redirect to dashboard
+        // Non-admin trying to access admin panel
         return <Navigate to="/dashboard" replace />;
       }
     } catch (e) {
@@ -29,6 +31,29 @@ function ProtectedRoute({ children, allowedRoles }: { children: React.ReactNode,
   }
 
   return <>{children}</>;
+}
+
+// Root Redirect Component
+function RootRedirect() {
+  const token = localStorage.getItem('token');
+  const userStr = localStorage.getItem('user');
+  
+  // Not authenticated - go to login
+  if (!token || !userStr) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  // Authenticated - redirect based on role
+  try {
+    const user = JSON.parse(userStr);
+    if (user.role === 'admin') {
+      return <Navigate to="/admin" replace />;
+    }
+    return <Navigate to="/dashboard" replace />;
+  } catch (e) {
+    // Invalid user data - go to login
+    return <Navigate to="/login" replace />;
+  }
 }
 
 function App() {
@@ -58,32 +83,10 @@ function App() {
           }
         />
 
-        {/* Root redirect based on authentication */}
-        <Route
-          path="/"
-          element={
-            (() => {
-              const token = localStorage.getItem('token');
-              const userStr = localStorage.getItem('user');
-              
-              if (!token || !userStr) {
-                return <Navigate to="/login" replace />;
-              }
-              
-              try {
-                const user = JSON.parse(userStr);
-                if (user.role === 'admin') {
-                  return <Navigate to="/admin" replace />;
-                }
-                return <Navigate to="/dashboard" replace />;
-              } catch (e) {
-                return <Navigate to="/login" replace />;
-              }
-            })()
-          }
-        />
+        {/* Root - Smart redirect based on auth status and role */}
+        <Route path="/" element={<RootRedirect />} />
 
-        {/* 404 - Redirect to appropriate dashboard */}
+        {/* 404 - Redirect to root (which will handle auth) */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
