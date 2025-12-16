@@ -83,7 +83,7 @@ export default function Admin() {
       details,
       timestamp: new Date()
     };
-    setAuditLogs(prev => [log, ...prev].slice(0, 50)); // Keep last 50 logs
+    setAuditLogs(prev => [log, ...prev].slice(0, 50));
     console.log(`[AUDIT] ${action}: ${details}`);
   };
 
@@ -91,7 +91,7 @@ export default function Admin() {
     // Check if user is admin
     const userStr = localStorage.getItem('user');
     if (!userStr) {
-      navigate('/dashboard');
+      navigate('/login');
       return;
     }
     
@@ -102,7 +102,7 @@ export default function Admin() {
         return;
       }
     } catch (e) {
-      navigate('/dashboard');
+      navigate('/login');
       return;
     }
     
@@ -114,7 +114,6 @@ export default function Admin() {
     const token = localStorage.getItem('token');
     
     try {
-      // Fetch documents
       const docsRes = await fetch(`${API_URL}/documents/`, {
         method: 'GET',
         mode: 'cors',
@@ -127,7 +126,6 @@ export default function Admin() {
       const docsData = await docsRes.json();
       setDocuments(docsData);
 
-      // Fetch users
       const usersRes = await fetch(`${API_URL}/users/`, {
         method: 'GET',
         mode: 'cors',
@@ -140,7 +138,6 @@ export default function Admin() {
       const usersData = await usersRes.json();
       setUsers(usersData);
 
-      // Fetch categories
       const catsRes = await fetch(`${API_URL}/categories/`, {
         method: 'GET',
         mode: 'cors',
@@ -160,6 +157,12 @@ export default function Admin() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
   };
 
   const handleDeleteDocument = async (docId: string) => {
@@ -415,7 +418,6 @@ export default function Admin() {
     return icons[fileType] || '📎';
   };
 
-  // Filtered users based on search and role filter
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.email.toLowerCase().includes(searchTerm.toLowerCase());
@@ -439,13 +441,6 @@ export default function Admin() {
         </div>
 
         <nav className="sidebar-nav">
-          <button onClick={() => navigate('/dashboard')} className="nav-item">
-            <svg viewBox="0 0 20 20" fill="currentColor">
-              <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
-            </svg>
-            <span>Back to Dashboard</span>
-          </button>
-          
           <button 
             onClick={() => setActiveTab('documents')} 
             className={`nav-item ${activeTab === 'documents' ? 'active' : ''}`}
@@ -481,7 +476,7 @@ export default function Admin() {
         </nav>
 
         <div className="sidebar-footer">
-          <button onClick={() => navigate('/dashboard')} className="btn-logout">
+          <button onClick={handleLogout} className="btn-logout">
             <svg viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clipRule="evenodd" />
             </svg>
@@ -490,7 +485,7 @@ export default function Admin() {
         </div>
       </aside>
 
-      {/* Main Content */}
+      {/* Main Content - Rest of the component stays the same */}
       <main className="admin-main">
         <header className="admin-header">
           <div>
@@ -606,7 +601,6 @@ export default function Admin() {
             {/* Users Tab */}
             {activeTab === 'users' && (
               <>
-                {/* Search & Filter Bar */}
                 <div className="filter-bar">
                   <div className="search-box">
                     <svg viewBox="0 0 20 20" fill="currentColor">
@@ -767,7 +761,7 @@ export default function Admin() {
         </div>
       </main>
 
-      {/* Delete Confirmation Modal */}
+      {/* All Modals - Keeping the existing modal code exactly as is */}
       {showDeleteModal && (
         <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>
           <div className="modal-content modal-small" onClick={(e) => e.stopPropagation()}>
@@ -791,7 +785,6 @@ export default function Admin() {
         </div>
       )}
 
-      {/* User Categories Modal */}
       {showUserModal && selectedUser && (
         <div className="modal-overlay" onClick={() => setShowUserModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -834,7 +827,6 @@ export default function Admin() {
         </div>
       )}
 
-      {/* Edit Document Categories Modal */}
       {showEditDocModal && selectedDoc && (
         <div className="modal-overlay" onClick={() => setShowEditDocModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -875,7 +867,6 @@ export default function Admin() {
         </div>
       )}
 
-      {/* Create Category Modal */}
       {showCategoryModal && (
         <div className="modal-overlay" onClick={() => setShowCategoryModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -917,7 +908,6 @@ export default function Admin() {
         </div>
       )}
 
-      {/* Create User Modal */}
       {showCreateUserModal && (
         <div className="modal-overlay" onClick={() => setShowCreateUserModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
