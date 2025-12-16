@@ -1,60 +1,92 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
+import UserDashboard from './pages/UserDashboard';
 import Admin from './pages/Admin';
 
+// Route Guards
+function ProtectedRoute({ children, allowedRoles }: { children: React.ReactNode, allowedRoles?: string[] }) {
+  const token = localStorage.getItem('token');
+  const userStr = localStorage.getItem('user');
+
+  if (!token || !userStr) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (allowedRoles) {
+    try {
+      const user = JSON.parse(userStr);
+      if (!allowedRoles.includes(user.role)) {
+        // If admin tries to access user dashboard, redirect to admin
+        if (user.role === 'admin' && allowedRoles.includes('medewerker')) {
+          return <Navigate to="/admin" replace />;
+        }
+        // If user tries to access admin, redirect to dashboard
+        return <Navigate to="/dashboard" replace />;
+      }
+    } catch (e) {
+      return <Navigate to="/login" replace />;
+    }
+  }
+
+  return <>{children}</>;
+}
+
 function App() {
-  const isAuthenticated = () => {
-    return !!localStorage.getItem('token');
-  };
-
-  const isAdmin = () => {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    return user.role === 'admin';
-  };
-
-  const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-    if (!isAuthenticated()) {
-      return <Navigate to="/" replace />;
-    }
-    return <>{children}</>;
-  };
-
-  const AdminRoute = ({ children }: { children: React.ReactNode }) => {
-    if (!isAuthenticated()) {
-      return <Navigate to="/" replace />;
-    }
-    if (!isAdmin()) {
-      return <Navigate to="/dashboard" replace />;
-    }
-    return <>{children}</>;
-  };
-
   return (
-    <BrowserRouter>
+    <Router>
       <Routes>
-        <Route 
-          path="/" 
-          element={isAuthenticated() ? <Navigate to="/dashboard" replace /> : <Login />} 
-        />
-        <Route 
-          path="/dashboard" 
+        {/* Public Routes */}
+        <Route path="/login" element={<Login />} />
+
+        {/* User Dashboard - For medewerker and manager roles */}
+        <Route
+          path="/dashboard"
           element={
-            <ProtectedRoute>
-              <Dashboard />
+            <ProtectedRoute allowedRoles={['medewerker', 'manager']}>
+              <UserDashboard />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/admin" 
+
+        {/* Admin Panel - Only for admin role */}
+        <Route
+          path="/admin"
           element={
-            <AdminRoute>
+            <ProtectedRoute allowedRoles={['admin']}>
               <Admin />
-            </AdminRoute>
-          } 
+            </ProtectedRoute>
+          }
         />
+
+        {/* Root redirect based on authentication */}
+        <Route
+          path="/"
+          element={
+            (() => {
+              const token = localStorage.getItem('token');
+              const userStr = localStorage.getItem('user');
+              
+              if (!token || !userStr) {
+                return <Navigate to="/login" replace />;
+              }
+              
+              try {
+                const user = JSON.parse(userStr);
+                if (user.role === 'admin') {
+                  return <Navigate to="/admin" replace />;
+                }
+                return <Navigate to="/dashboard" replace />;
+              } catch (e) {
+                return <Navigate to="/login" replace />;
+              }
+            })()
+          }
+        />
+
+        {/* 404 - Redirect to appropriate dashboard */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </BrowserRouter>
+    </Router>
   );
 }
 
