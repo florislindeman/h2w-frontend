@@ -10,6 +10,13 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Forgot Password State
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetSuccess, setResetSuccess] = useState(false);
+  const [resetError, setResetError] = useState('');
+  const [isResetting, setIsResetting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,6 +63,43 @@ export default function Login() {
       setError(err.message || 'Invalid credentials');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setResetError('');
+    setResetSuccess(false);
+    setIsResetting(true);
+
+    try {
+      const response = await fetch(`${API_URL}/auth/forgot-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: resetEmail,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Password reset failed');
+      }
+
+      setResetSuccess(true);
+      setResetEmail('');
+      
+      // Close modal after 3 seconds
+      setTimeout(() => {
+        setShowForgotPassword(false);
+        setResetSuccess(false);
+      }, 3000);
+    } catch (err: any) {
+      setResetError(err.message || 'Failed to send reset email. Please contact your administrator.');
+    } finally {
+      setIsResetting(false);
     }
   };
 
@@ -148,10 +192,111 @@ export default function Login() {
           </form>
 
           <div className="login-footer">
-            <p>Need access? Contact your administrator</p>
+            <button 
+              type="button"
+              onClick={() => setShowForgotPassword(true)}
+              className="forgot-password-link"
+            >
+              Forgot your password?
+            </button>
+            <p className="footer-note">Need access? Contact your administrator</p>
           </div>
         </div>
       </div>
+
+      {/* Forgot Password Modal */}
+      {showForgotPassword && (
+        <div className="modal-overlay" onClick={() => setShowForgotPassword(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Reset Password</h2>
+              <button 
+                onClick={() => setShowForgotPassword(false)} 
+                className="modal-close"
+              >
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+
+            {resetSuccess ? (
+              <div className="modal-body">
+                <div className="success-message">
+                  <svg viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <h3>Check your email</h3>
+                  <p>We've sent password reset instructions to your email address.</p>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="modal-body">
+                  <p className="modal-description">
+                    Enter your email address and we'll send you instructions to reset your password.
+                  </p>
+
+                  {resetError && (
+                    <div className="alert alert-error">
+                      <svg viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                      <span>{resetError}</span>
+                    </div>
+                  )}
+
+                  <form onSubmit={handleForgotPassword}>
+                    <div className="form-field">
+                      <label htmlFor="reset-email" className="field-label">Email Address</label>
+                      <div className="input-wrapper">
+                        <svg className="input-icon" viewBox="0 0 20 20" fill="currentColor">
+                          <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                          <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                        </svg>
+                        <input
+                          id="reset-email"
+                          type="email"
+                          value={resetEmail}
+                          onChange={(e) => setResetEmail(e.target.value)}
+                          placeholder="you@company.com"
+                          className="field-input"
+                          required
+                          autoComplete="email"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="modal-actions">
+                      <button
+                        type="button"
+                        onClick={() => setShowForgotPassword(false)}
+                        className="btn-secondary"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="btn-submit"
+                        disabled={isResetting}
+                      >
+                        {isResetting ? (
+                          <>
+                            <span className="spinner"></span>
+                            <span>Sending...</span>
+                          </>
+                        ) : (
+                          <span>Send Reset Link</span>
+                        )}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
