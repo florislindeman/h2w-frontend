@@ -75,6 +75,11 @@ export default function Admin() {
     category_ids: [] as string[]
   });
 
+  // Edit Document Modal - RE-ADDED
+  const [showEditDocModal, setShowEditDocModal] = useState(false);
+  const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
+  const [docCategoryIds, setDocCategoryIds] = useState<string[]>([]);
+
   // Audit Logging
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
 
@@ -354,6 +359,39 @@ export default function Admin() {
     }
   };
 
+  const handleUpdateDocumentCategories = async () => {
+    if (!selectedDoc) return;
+    
+    const token = localStorage.getItem('token');
+    
+    try {
+      const response = await fetch(`${API_URL}/documents/${selectedDoc.id}`, {
+        method: 'PUT',
+        mode: 'cors',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ category_ids: docCategoryIds }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to update document categories');
+      }
+      
+      await fetchData();
+      setShowEditDocModal(false);
+      setSelectedDoc(null);
+      addAuditLog('UPDATE_DOC_CATEGORIES', `Updated categories for document: ${selectedDoc.title}`);
+    } catch (error) {
+      console.error('Error updating document categories:', error);
+      alert(`Failed to update document categories: ${error}`);
+      addAuditLog('ERROR', `Failed to update document categories: ${error}`);
+    }
+  };
+
   const getFileIcon = (fileType: string) => {
     const icons: Record<string, string> = {
       pdf: '📄',
@@ -518,6 +556,18 @@ export default function Admin() {
                         </td>
                         <td>
                           <div className="action-buttons">
+                            <button
+                              onClick={() => {
+                                setSelectedDoc(doc);
+                                setDocCategoryIds(doc.categories?.map(c => c.id) || []);
+                                setShowEditDocModal(true);
+                              }}
+                              className="btn-icon btn-edit"
+                            >
+                              <svg viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                              </svg>
+                            </button>
                             <button
                               onClick={() => {
                                 setDeleteTarget(doc);
@@ -936,6 +986,71 @@ export default function Admin() {
                     Upload Document
                   </>
                 )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Document Modal - RE-ADDED */}
+      {showEditDocModal && selectedDoc && (
+        <div className="modal-overlay" onClick={() => setShowEditDocModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2 className="modal-title">Edit Document Categories</h2>
+              <button onClick={() => setShowEditDocModal(false)} className="modal-close">
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+            <div className="modal-body">
+              <div className="form-group">
+                <label className="form-label">Document</label>
+                <div style={{ padding: '0.75rem', background: '#0f172a', borderRadius: '0.5rem', border: '1px solid #334155' }}>
+                  <div style={{ fontWeight: 600, marginBottom: '0.25rem' }}>{selectedDoc.title}</div>
+                  <div style={{ fontSize: '0.875rem', color: '#94a3b8' }}>{selectedDoc.file_name}</div>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Categories (Select at least one)</label>
+                <div className="checkbox-group">
+                  {categories.map((category) => (
+                    <label key={category.id} className="checkbox-label">
+                      <input
+                        type="checkbox"
+                        checked={docCategoryIds.includes(category.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setDocCategoryIds([...docCategoryIds, category.id]);
+                          } else {
+                            setDocCategoryIds(docCategoryIds.filter(id => id !== category.id));
+                          }
+                        }}
+                      />
+                      <span>{category.name}</span>
+                      {category.description && (
+                        <span className="text-muted" style={{ fontSize: '0.875rem', marginLeft: '0.5rem' }}>
+                          — {category.description}
+                        </span>
+                      )}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button onClick={() => setShowEditDocModal(false)} className="btn-secondary">
+                Cancel
+              </button>
+              <button 
+                onClick={handleUpdateDocumentCategories}
+                disabled={docCategoryIds.length === 0}
+                className="btn-primary"
+                style={{ opacity: docCategoryIds.length === 0 ? 0.5 : 1 }}
+              >
+                Save Changes
               </button>
             </div>
           </div>
