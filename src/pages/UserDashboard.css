@@ -350,7 +350,7 @@
 .chat-input:focus {
   outline: none;
   border-color: #006B7D;
-  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+  box-shadow: 0 0 0 4px rgba(0, 107, 125, 0.1);
 }
 
 .chat-input::placeholder {
@@ -384,7 +384,7 @@
 
 .btn-send:hover:not(:disabled) {
   transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+  box-shadow: 0 4px 12px rgba(0, 107, 125, 0.4);
 }
 
 .btn-send:disabled {
@@ -446,7 +446,7 @@
 .form-input:focus {
   outline: none;
   border-color: #006B7D;
-  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+  box-shadow: 0 0 0 4px rgba(0, 107, 125, 0.1);
 }
 
 .form-input::placeholder {
@@ -479,7 +479,7 @@
 
 .file-label:hover {
   border-color: #006B7D;
-  background: rgba(124, 58, 237, 0.05);
+  background: rgba(0, 107, 125, 0.05);
 }
 
 .file-label svg {
@@ -521,7 +521,7 @@
 
 .category-checkbox:hover {
   border-color: #006B7D;
-  background: rgba(124, 58, 237, 0.05);
+  background: rgba(0, 107, 125, 0.05);
 }
 
 .category-checkbox input[type="checkbox"] {
@@ -566,7 +566,7 @@
 
 .btn-primary:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(124, 58, 237, 0.4);
+  box-shadow: 0 8px 16px rgba(0, 107, 125, 0.4);
 }
 
 .btn-primary:disabled {
