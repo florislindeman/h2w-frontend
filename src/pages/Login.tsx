@@ -35,11 +35,9 @@ export default function Login() {
 
       const data = await response.json();
       
-      // Store token and user data
       localStorage.setItem('token', data.access_token);
       localStorage.setItem('user', JSON.stringify(data.user));
 
-      // Role-based redirect
       if (data.user.role === 'admin') {
         navigate('/admin');
       } else {
@@ -53,88 +51,96 @@ export default function Login() {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <div className="login-header">
-          <div className="login-logo">
-            <svg viewBox="0 0 24 24" fill="none">
-              <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-          <h1>Welcome to H2W</h1>
-          <p>AI-Powered Knowledge Base</p>
-        </div>
+    <div className="login-wrapper">
+      <div className="login-background">
+        <div className="bg-shape shape-1"></div>
+        <div className="bg-shape shape-2"></div>
+        <div className="bg-shape shape-3"></div>
+      </div>
 
-        <form onSubmit={handleSubmit} className="login-form">
-          {error && (
-            <div className="error-message">
-              <svg viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+      <div className="login-container">
+        <div className="login-card">
+          <div className="login-header">
+            <div className="logo-container">
+              <svg className="logo-icon" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-              {error}
             </div>
-          )}
-
-          <div className="form-group">
-            <label htmlFor="email" className="form-label">
-              <svg viewBox="0 0 20 20" fill="currentColor">
-                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-              </svg>
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
-              className="form-input"
-              required
-              autoComplete="email"
-            />
+            <h1 className="login-title">Welcome Back</h1>
+            <p className="login-subtitle">Sign in to access your knowledge base</p>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="password" className="form-label">
-              <svg viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-              </svg>
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-              className="form-input"
-              required
-              autoComplete="current-password"
-            />
-          </div>
-
-          <button type="submit" className="btn-login" disabled={isLoading}>
-            {isLoading ? (
-              <>
-                <div className="spinner"></div>
-                Signing in...
-              </>
-            ) : (
-              <>
+          <form onSubmit={handleSubmit} className="login-form">
+            {error && (
+              <div className="alert alert-error">
                 <svg viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M3 3a1 1 0 011 1v12a1 1 0 11-2 0V4a1 1 0 011-1zm7.707 3.293a1 1 0 010 1.414L9.414 9H17a1 1 0 110 2H9.414l1.293 1.293a1 1 0 01-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0z" clipRule="evenodd" />
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                 </svg>
-                Sign In
-              </>
+                <span>{error}</span>
+              </div>
             )}
-          </button>
-        </form>
 
-        <div className="login-footer">
-          <p>Don't have an account? Contact your administrator</p>
+            <div className="form-field">
+              <label htmlFor="email" className="field-label">Email Address</label>
+              <div className="input-wrapper">
+                <svg className="input-icon" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                </svg>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@company.com"
+                  className="field-input"
+                  required
+                  autoComplete="email"
+                />
+              </div>
+            </div>
+
+            <div className="form-field">
+              <label htmlFor="password" className="field-label">Password</label>
+              <div className="input-wrapper">
+                <svg className="input-icon" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                </svg>
+                <input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  className="field-input"
+                  required
+                  autoComplete="current-password"
+                />
+              </div>
+            </div>
+
+            <button type="submit" className="btn-submit" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <span className="spinner"></span>
+                  <span>Signing in...</span>
+                </>
+              ) : (
+                <>
+                  <span>Sign In</span>
+                  <svg viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </>
+              )}
+            </button>
+          </form>
+
+          <div className="login-footer">
+            <p>Need access? Contact your administrator</p>
+          </div>
         </div>
       </div>
     </div>
