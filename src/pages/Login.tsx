@@ -115,11 +115,17 @@ export default function Login() {
         <div className="login-card">
           <div className="login-header">
             <div className="logo-container">
-              <svg className="logo-icon" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              <div className="ncg-logo">
+                <div className="logo-lines">
+                  <div className="logo-line"></div>
+                  <div className="logo-line"></div>
+                  <div className="logo-line"></div>
+                </div>
+                <div className="logo-text">
+                  <div className="logo-title">NCG</div>
+                  <div className="logo-subtitle">CREATING CONCEPTS</div>
+                </div>
+              </div>
             </div>
             <h1 className="login-title">Welcome Back</h1>
             <p className="login-subtitle">Sign in to access your knowledge base</p>
