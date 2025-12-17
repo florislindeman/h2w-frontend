@@ -75,29 +75,36 @@ export default function UserDashboard() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}/chat/`, {
+      
+      // Use /query endpoint instead of /chat
+      const response = await fetch(`${API_URL}/query`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          message: inputMessage,
-          conversation_history: messages,
+          query: inputMessage,
         }),
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
+      
       const assistantMessage: Message = {
         role: 'assistant',
-        content: data.response || 'Sorry, I could not process your request.',
+        content: data.response || data.answer || 'Sorry, ik kon je vraag niet verwerken.',
       };
+      
       setMessages([...messages, userMessage, assistantMessage]);
     } catch (error) {
       console.error('Error sending message:', error);
       const errorMessage: Message = {
         role: 'assistant',
-        content: 'Sorry, there was an error processing your request.',
+        content: 'Sorry, er is een fout opgetreden bij het verwerken van je vraag. Zorg ervoor dat je aan minimaal één categorie bent toegewezen.',
       };
       setMessages([...messages, userMessage, errorMessage]);
     } finally {
@@ -388,4 +395,3 @@ export default function UserDashboard() {
     </div>
   );
 }
-
