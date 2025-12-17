@@ -35,10 +35,19 @@ export default function Login() {
 
       const data = await response.json();
       
+      // Store token
       localStorage.setItem('token', data.access_token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      
+      // Store user data (construct user object from response)
+      const user = {
+        email: data.email,
+        role: data.role,
+        full_name: data.full_name || data.email.split('@')[0], // fallback to email username
+      };
+      localStorage.setItem('user', JSON.stringify(user));
 
-      if (data.user.role === 'admin') {
+      // Role-based redirect
+      if (data.role === 'admin') {
         navigate('/admin');
       } else {
         navigate('/dashboard');
