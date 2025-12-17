@@ -160,10 +160,10 @@
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
-  padding: 0.5rem 0.75rem;
+  padding: 0.5rem 0.625rem;
   background: linear-gradient(135deg, #006B7D 0%, #00A8C5 100%);
   border: none;
-  border-radius: 0.5rem;
+  border-radius: 0.375rem;
   color: white;
   font-size: 0.875rem;
   font-weight: 600;
