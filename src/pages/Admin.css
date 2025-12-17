@@ -751,6 +751,12 @@
   height: 16px;
 }
 
+.btn-icon-small.btn-edit:hover {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
+}
+
 .btn-icon-small.btn-delete:hover {
   background: #ef4444;
   border-color: #ef4444;
