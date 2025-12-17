@@ -309,8 +309,17 @@ export default function UserDashboard() {
               <p>Add a new document to the knowledge base</p>
             </div>
 
-            <div className="upload-form">
-              <div className="form-section">
+            <div className="upload-section">
+              {uploadSuccess && (
+                <div className="success-banner">
+                  <svg viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span>Document uploaded successfully!</span>
+                </div>
+              )}
+
+              <div className="form-group">
                 <label className="form-label">Document Title *</label>
                 <input
                   type="text"
@@ -321,9 +330,9 @@ export default function UserDashboard() {
                 />
               </div>
 
-              <div className="form-section">
+              <div className="form-group">
                 <label className="form-label">Select File *</label>
-                <div className="file-upload-area">
+                <div className="file-drop-zone">
                   <input
                     type="file"
                     id="file-input"
@@ -331,23 +340,40 @@ export default function UserDashboard() {
                     accept=".pdf,.docx,.txt"
                     className="file-input"
                   />
-                  <label htmlFor="file-input" className="file-label">
-                    <svg viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                    </svg>
-                    <span>{selectedFile ? selectedFile.name : 'Choose a file or drag it here'}</span>
-                    <span className="file-types">PDF, DOCX, TXT (Max 10MB)</span>
+                  <label htmlFor="file-input" className="file-drop-label">
+                    {selectedFile ? (
+                      <div className="selected-file">
+                        <svg viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        <div className="file-info">
+                          <p>{selectedFile.name}</p>
+                          <span>{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <svg viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                        </svg>
+                        <div className="file-info">
+                          <p>Choose a file or drag it here</p>
+                          <span>PDF, DOCX, TXT (Max 10MB)</span>
+                        </div>
+                      </>
+                    )}
                   </label>
                 </div>
               </div>
 
-              <div className="form-section">
-                <label className="form-label">Categories *</label>
-                <div className="categories-grid">
+              <div className="form-group">
+                <label className="form-label">Categories * (Select at least one)</label>
+                <div className="categories-section">
                   {categories.map((category) => (
-                    <label key={category.id} className="category-checkbox">
+                    <div key={category.id} className="category-checkbox-item">
                       <input
                         type="checkbox"
+                        id={`cat-${category.id}`}
                         checked={selectedCategories.includes(category.id)}
                         onChange={(e) => {
                           if (e.target.checked) {
@@ -357,23 +383,23 @@ export default function UserDashboard() {
                           }
                         }}
                       />
-                      <span>{category.name}</span>
-                    </label>
+                      <label htmlFor={`cat-${category.id}`}>{category.name}</label>
+                    </div>
                   ))}
                 </div>
               </div>
 
-              <div className="form-actions">
+              <div className="upload-actions">
                 <button
                   onClick={() => setActiveView('chat')}
-                  className="btn-secondary"
+                  className="btn-cancel"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleFileUpload}
                   disabled={isUploading || !selectedFile || !uploadTitle.trim() || selectedCategories.length === 0}
-                  className="btn-primary"
+                  className="btn-upload"
                 >
                   {isUploading ? (
                     <>
