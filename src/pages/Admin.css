@@ -160,7 +160,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.625rem 1rem;
+  padding: 0.625rem 0.5rem;
   background: linear-gradient(135deg, #006B7D 0%, #00A8C5 100%);
   border: none;
   border-radius: 0.5rem;
