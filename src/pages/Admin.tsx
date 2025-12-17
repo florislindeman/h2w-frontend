@@ -500,12 +500,14 @@ export default function Admin() {
       <aside className="admin-sidebar">
         <div className="sidebar-header">
           <div className="sidebar-logo">
-            <svg className="sidebar-logo-icon" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <span>H2W Admin</span>
+            <div className="ncg-logo-sidebar">
+              <div className="logo-lines">
+                <div className="logo-line"></div>
+                <div className="logo-line"></div>
+                <div className="logo-line"></div>
+              </div>
+            </div>
+            <span>NCG Admin</span>
           </div>
         </div>
 
