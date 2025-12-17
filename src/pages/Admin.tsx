@@ -62,9 +62,6 @@ export default function Admin() {
   const [deleteTarget, setDeleteTarget] = useState<any>(null);
   const [deleteType, setDeleteType] = useState<'document' | 'user' | 'category'>('document');
   
-  const [showUserModal, setShowUserModal] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [newCategory, setNewCategory] = useState({ name: '', description: '' });
   
@@ -77,10 +74,6 @@ export default function Admin() {
     department_id: null as string | null,
     category_ids: [] as string[]
   });
-  
-  const [showEditDocModal, setShowEditDocModal] = useState(false);
-  const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
-  const [docCategoryIds, setDocCategoryIds] = useState<string[]>([]);
 
   // Audit Logging
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
