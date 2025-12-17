@@ -35,7 +35,7 @@ interface AuditLog {
   timestamp: Date;
 }
 
-type TabType = 'documents' | 'users' | 'categories' | 'upload';
+type TabType = 'documents' | 'users' | 'categories';
 
 export default function Admin() {
   const navigate = useNavigate();
@@ -57,6 +57,7 @@ export default function Admin() {
   const [uploadSuccess, setUploadSuccess] = useState(false);
   
   // Modals
+  const [showUploadModal, setShowUploadModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<any>(null);
   const [deleteType, setDeleteType] = useState<'document' | 'user' | 'category'>('document');
@@ -208,9 +209,9 @@ export default function Admin() {
         setUploadCategories([]);
         await fetchData();
         setTimeout(() => {
-          setActiveTab('documents');
+          setShowUploadModal(false);
           setUploadSuccess(false);
-        }, 2000);
+        }, 1500);
       } else {
         const error = await response.json();
         alert(`Upload failed: ${error.detail}`);
@@ -406,16 +407,6 @@ export default function Admin() {
           </button>
 
           <button 
-            onClick={() => setActiveTab('upload')} 
-            className={`nav-item ${activeTab === 'upload' ? 'active' : ''}`}
-          >
-            <svg viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
-            </svg>
-            <span>Upload</span>
-          </button>
-
-          <button 
             onClick={() => setActiveTab('users')} 
             className={`nav-item ${activeTab === 'users' ? 'active' : ''}`}
           >
@@ -454,17 +445,23 @@ export default function Admin() {
           <div>
             <h1 className="admin-title">
               {activeTab === 'documents' && 'Document Management'}
-              {activeTab === 'upload' && 'Upload Document'}
               {activeTab === 'users' && 'User Management'}
               {activeTab === 'categories' && 'Category Management'}
             </h1>
             <p className="admin-subtitle">
               {activeTab === 'documents' && 'View and manage all documents'}
-              {activeTab === 'upload' && 'Upload new documents to the knowledge base'}
               {activeTab === 'users' && 'Manage user roles and permissions'}
               {activeTab === 'categories' && 'Organize content with categories'}
             </p>
           </div>
+          {activeTab === 'documents' && (
+            <button onClick={() => setShowUploadModal(true)} className="btn-primary">
+              <svg viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
+              </svg>
+              Upload Document
+            </button>
+          )}
           {activeTab === 'users' && (
             <button onClick={() => setShowCreateUserModal(true)} className="btn-primary">
               <svg viewBox="0 0 20 20" fill="currentColor">
@@ -490,122 +487,6 @@ export default function Admin() {
           </div>
         ) : (
           <>
-            {/* UPLOAD TAB - NEW */}
-            {activeTab === 'upload' && (
-              <div className="upload-section">
-                {uploadSuccess && (
-                  <div className="success-banner">
-                    <svg viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span>Document uploaded successfully! Redirecting...</span>
-                  </div>
-                )}
-
-                <div className="upload-card">
-                  <div className="upload-form-section">
-                    <label className="upload-label">Document Title *</label>
-                    <input
-                      type="text"
-                      value={uploadTitle}
-                      onChange={(e) => setUploadTitle(e.target.value)}
-                      placeholder="Enter document title..."
-                      className="upload-input"
-                    />
-                  </div>
-
-                  <div className="upload-form-section">
-                    <label className="upload-label">Select File *</label>
-                    <div className="file-drop-zone">
-                      <input
-                        type="file"
-                        id="file-upload"
-                        onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-                        accept=".pdf,.docx,.txt"
-                        className="file-input-hidden"
-                      />
-                      <label htmlFor="file-upload" className="file-drop-label">
-                        {selectedFile ? (
-                          <>
-                            <svg viewBox="0 0 20 20" fill="currentColor" className="file-icon-success">
-                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                            </svg>
-                            <span className="file-name">{selectedFile.name}</span>
-                            <span className="file-size">
-                              {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
-                            </span>
-                          </>
-                        ) : (
-                          <>
-                            <svg viewBox="0 0 20 20" fill="currentColor" className="file-icon">
-                              <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                            </svg>
-                            <span className="file-label-text">Choose a file or drag it here</span>
-                            <span className="file-hint">PDF, DOCX, TXT (Max 10MB)</span>
-                          </>
-                        )}
-                      </label>
-                    </div>
-                  </div>
-
-                  <div className="upload-form-section">
-                    <label className="upload-label">Categories * (Select at least one)</label>
-                    <div className="categories-checkbox-grid">
-                      {categories.map((category) => (
-                        <label key={category.id} className="category-checkbox-item">
-                          <input
-                            type="checkbox"
-                            checked={uploadCategories.includes(category.id)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setUploadCategories([...uploadCategories, category.id]);
-                              } else {
-                                setUploadCategories(uploadCategories.filter(id => id !== category.id));
-                              }
-                            }}
-                          />
-                          <span>{category.name}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="upload-actions">
-                    <button
-                      onClick={() => {
-                        setSelectedFile(null);
-                        setUploadTitle('');
-                        setUploadCategories([]);
-                        setActiveTab('documents');
-                      }}
-                      className="btn-cancel"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleFileUpload}
-                      disabled={isUploading || !selectedFile || !uploadTitle.trim() || uploadCategories.length === 0}
-                      className="btn-upload"
-                    >
-                      {isUploading ? (
-                        <>
-                          <div className="spinner-small"></div>
-                          Uploading...
-                        </>
-                      ) : (
-                        <>
-                          <svg viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                          </svg>
-                          Upload Document
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* DOCUMENTS TAB */}
             {activeTab === 'documents' && (
               <div className="admin-table-container">
@@ -936,6 +817,132 @@ export default function Admin() {
               </button>
               <button onClick={handleCreateCategory} className="btn-primary">
                 Create Category
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Upload Document Modal - NEW */}
+      {showUploadModal && (
+        <div className="modal-overlay" onClick={() => setShowUploadModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '700px' }}>
+            <div className="modal-header">
+              <h2 className="modal-title">Upload Document</h2>
+              <button onClick={() => setShowUploadModal(false)} className="modal-close">
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+            <div className="modal-body">
+              {uploadSuccess && (
+                <div className="success-banner" style={{ marginBottom: '1.5rem' }}>
+                  <svg viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span>Document uploaded successfully!</span>
+                </div>
+              )}
+
+              <div className="form-group">
+                <label className="form-label">Document Title *</label>
+                <input
+                  type="text"
+                  value={uploadTitle}
+                  onChange={(e) => setUploadTitle(e.target.value)}
+                  placeholder="Enter document title..."
+                  className="form-input"
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Select File *</label>
+                <div className="file-drop-zone">
+                  <input
+                    type="file"
+                    id="file-upload-modal"
+                    onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                    accept=".pdf,.docx,.txt"
+                    className="file-input-hidden"
+                  />
+                  <label htmlFor="file-upload-modal" className="file-drop-label">
+                    {selectedFile ? (
+                      <>
+                        <svg viewBox="0 0 20 20" fill="currentColor" className="file-icon-success">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        <span className="file-name">{selectedFile.name}</span>
+                        <span className="file-size">
+                          {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <svg viewBox="0 0 20 20" fill="currentColor" className="file-icon">
+                          <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                        </svg>
+                        <span className="file-label-text">Choose a file or drag it here</span>
+                        <span className="file-hint">PDF, DOCX, TXT (Max 10MB)</span>
+                      </>
+                    )}
+                  </label>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Categories * (Select at least one)</label>
+                <div className="categories-checkbox-grid">
+                  {categories.map((category) => (
+                    <label key={category.id} className="category-checkbox-item">
+                      <input
+                        type="checkbox"
+                        checked={uploadCategories.includes(category.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setUploadCategories([...uploadCategories, category.id]);
+                          } else {
+                            setUploadCategories(uploadCategories.filter(id => id !== category.id));
+                          }
+                        }}
+                      />
+                      <span>{category.name}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button 
+                onClick={() => {
+                  setSelectedFile(null);
+                  setUploadTitle('');
+                  setUploadCategories([]);
+                  setShowUploadModal(false);
+                }} 
+                className="btn-secondary"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleFileUpload}
+                disabled={isUploading || !selectedFile || !uploadTitle.trim() || uploadCategories.length === 0}
+                className="btn-primary"
+                style={{ opacity: (isUploading || !selectedFile || !uploadTitle.trim() || uploadCategories.length === 0) ? 0.5 : 1 }}
+              >
+                {isUploading ? (
+                  <>
+                    <div className="spinner-small"></div>
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <svg viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                    </svg>
+                    Upload Document
+                  </>
+                )}
               </button>
             </div>
           </div>
