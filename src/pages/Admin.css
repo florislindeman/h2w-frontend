@@ -38,7 +38,7 @@
 .sidebar-logo-icon {
   width: 32px;
   height: 32px;
-  color: #a855f7;
+  color: #00A8C5;
 }
 
 .sidebar-nav {
@@ -78,7 +78,7 @@
 }
 
 .nav-item.active {
-  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+  background: linear-gradient(135deg, #006B7D 0%, #00A8C5 100%);
   color: white;
 }
 
@@ -161,7 +161,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+  background: linear-gradient(135deg, #006B7D 0%, #00A8C5 100%);
   border: none;
   border-radius: 0.5rem;
   color: white;
@@ -248,7 +248,7 @@
 
 .upload-input:focus {
   outline: none;
-  border-color: #7c3aed;
+  border-color: #006B7D;
   box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
 }
 
@@ -278,14 +278,14 @@
 }
 
 .file-drop-label:hover {
-  border-color: #7c3aed;
+  border-color: #006B7D;
   background: rgba(124, 58, 237, 0.05);
 }
 
 .file-icon {
   width: 48px;
   height: 48px;
-  color: #7c3aed;
+  color: #006B7D;
   margin-bottom: 1rem;
 }
 
@@ -339,7 +339,7 @@
 }
 
 .category-checkbox-item:hover {
-  border-color: #7c3aed;
+  border-color: #006B7D;
   background: rgba(124, 58, 237, 0.05);
 }
 
@@ -347,11 +347,11 @@
   width: 20px;
   height: 20px;
   cursor: pointer;
-  accent-color: #7c3aed;
+  accent-color: #006B7D;
 }
 
 .category-checkbox-item input[type="checkbox"]:checked ~ span {
-  color: #a855f7;
+  color: #00A8C5;
   font-weight: 600;
 }
 
@@ -385,7 +385,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.875rem 1.75rem;
-  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+  background: linear-gradient(135deg, #006B7D 0%, #00A8C5 100%);
   border: none;
   border-radius: 0.75rem;
   color: white;
@@ -465,7 +465,7 @@
 
 .search-input:focus {
   outline: none;
-  border-color: #7c3aed;
+  border-color: #006B7D;
   box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
 }
 
@@ -486,7 +486,7 @@
 
 .filter-select:focus {
   outline: none;
-  border-color: #7c3aed;
+  border-color: #006B7D;
 }
 
 .filter-info {
@@ -509,7 +509,7 @@
   width: 48px;
   height: 48px;
   border: 4px solid #334155;
-  border-top-color: #a855f7;
+  border-top-color: #00A8C5;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -589,7 +589,7 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+  background: linear-gradient(135deg, #006B7D 0%, #00A8C5 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -698,7 +698,7 @@
 
 .role-select:focus {
   outline: none;
-  border-color: #7c3aed;
+  border-color: #006B7D;
 }
 
 /* Categories Grid */
@@ -717,7 +717,7 @@
 }
 
 .category-card:hover {
-  border-color: #7c3aed;
+  border-color: #006B7D;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
 }
@@ -815,7 +815,7 @@
 
 .audit-action {
   font-weight: 600;
-  color: #a855f7;
+  color: #00A8C5;
   min-width: 150px;
 }
 
@@ -972,7 +972,7 @@
 .form-input:focus,
 .form-textarea:focus {
   outline: none;
-  border-color: #7c3aed;
+  border-color: #006B7D;
   box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
 }
 
@@ -1001,14 +1001,14 @@
 
 .checkbox-label:hover {
   background: rgba(124, 58, 237, 0.05);
-  border-color: #7c3aed;
+  border-color: #006B7D;
 }
 
 .checkbox-label input[type="checkbox"] {
   width: 18px;
   height: 18px;
   cursor: pointer;
-  accent-color: #7c3aed;
+  accent-color: #006B7D;
 }
 
 /* Utility Classes */
@@ -1083,4 +1083,39 @@
   .btn-upload {
     width: 100%;
   }
+}
+
+/* NCG Logo Styling for Sidebar */
+.ncg-logo-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ncg-logo-sidebar .logo-line {
+  height: 3px;
+  background: #00A8C5;
+  border-radius: 1.5px;
+  transition: all 0.3s ease;
+}
+
+.ncg-logo-sidebar .logo-line:nth-child(1) {
+  width: 20px;
+}
+
+.ncg-logo-sidebar .logo-line:nth-child(2) {
+  width: 24px;
+}
+
+.ncg-logo-sidebar .logo-line:nth-child(3) {
+  width: 18px;
+}
+
+.sidebar-logo:hover .ncg-logo-sidebar .logo-line {
+  background: #ffffff;
+}
+
+.sidebar-logo:hover .ncg-logo-sidebar .logo-line:nth-child(1),
+.sidebar-logo:hover .ncg-logo-sidebar .logo-line:nth-child(3) {
+  width: 24px;
 }
