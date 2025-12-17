@@ -138,6 +138,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 2rem;
   margin-bottom: 2rem;
   padding-bottom: 1.5rem;
   border-bottom: 1px solid #e2e8f0;
@@ -172,6 +173,8 @@
   white-space: nowrap;
   flex-shrink: 0;
   box-shadow: 0 2px 8px rgba(0, 107, 125, 0.2);
+  width: auto;
+  max-width: fit-content;
 }
 
 .btn-primary svg {
