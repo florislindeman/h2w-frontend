@@ -80,6 +80,18 @@ export default function Admin() {
   const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
   const [docCategoryIds, setDocCategoryIds] = useState<string[]>([]);
 
+  // Edit User Modal - NEW
+  const [showEditUserModal, setShowEditUserModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [editUserCategories, setEditUserCategories] = useState<string[]>([]);
+  const [editUserRole, setEditUserRole] = useState<string>('medewerker');
+
+  // Edit Category Modal - NEW
+  const [showEditCategoryModal, setShowEditCategoryModal] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [editCategoryName, setEditCategoryName] = useState('');
+  const [editCategoryDescription, setEditCategoryDescription] = useState('');
+
   // Audit Logging
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
 
@@ -392,6 +404,78 @@ export default function Admin() {
     }
   };
 
+  const handleUpdateUser = async () => {
+    if (!selectedUser) return;
+    
+    const token = localStorage.getItem('token');
+    
+    try {
+      const response = await fetch(`${API_URL}/users/${selectedUser.id}`, {
+        method: 'PUT',
+        mode: 'cors',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ 
+          role: editUserRole,
+          category_ids: editUserCategories 
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to update user');
+      }
+      
+      await fetchData();
+      setShowEditUserModal(false);
+      setSelectedUser(null);
+      addAuditLog('UPDATE_USER', `Updated user: ${selectedUser.email}`);
+    } catch (error) {
+      console.error('Error updating user:', error);
+      alert(`Failed to update user: ${error}`);
+      addAuditLog('ERROR', `Failed to update user: ${error}`);
+    }
+  };
+
+  const handleUpdateCategory = async () => {
+    if (!selectedCategory) return;
+    
+    const token = localStorage.getItem('token');
+    
+    try {
+      const response = await fetch(`${API_URL}/categories/${selectedCategory.id}`, {
+        method: 'PUT',
+        mode: 'cors',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ 
+          name: editCategoryName,
+          description: editCategoryDescription 
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to update category');
+      }
+      
+      await fetchData();
+      setShowEditCategoryModal(false);
+      setSelectedCategory(null);
+      addAuditLog('UPDATE_CATEGORY', `Updated category: ${editCategoryName}`);
+    } catch (error) {
+      console.error('Error updating category:', error);
+      alert(`Failed to update category: ${error}`);
+      addAuditLog('ERROR', `Failed to update category: ${error}`);
+    }
+  };
+
   const getFileIcon = (fileType: string) => {
     const icons: Record<string, string> = {
       pdf: '📄',
@@ -655,6 +739,19 @@ export default function Admin() {
                             <div className="action-buttons">
                               <button
                                 onClick={() => {
+                                  setSelectedUser(user);
+                                  setEditUserRole(user.role);
+                                  setEditUserCategories(user.categories?.map(c => c.id) || []);
+                                  setShowEditUserModal(true);
+                                }}
+                                className="btn-icon btn-edit"
+                              >
+                                <svg viewBox="0 0 20 20" fill="currentColor">
+                                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                </svg>
+                              </button>
+                              <button
+                                onClick={() => {
                                   setDeleteTarget(user);
                                   setDeleteType('user');
                                   setShowDeleteModal(true);
@@ -682,18 +779,33 @@ export default function Admin() {
                   <div key={category.id} className="category-card">
                     <div className="category-header">
                       <h3>{category.name}</h3>
-                      <button
-                        onClick={() => {
-                          setDeleteTarget(category);
-                          setDeleteType('category');
-                          setShowDeleteModal(true);
-                        }}
-                        className="btn-icon-small btn-delete"
-                      >
-                        <svg viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                        </svg>
-                      </button>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button
+                          onClick={() => {
+                            setSelectedCategory(category);
+                            setEditCategoryName(category.name);
+                            setEditCategoryDescription(category.description || '');
+                            setShowEditCategoryModal(true);
+                          }}
+                          className="btn-icon-small btn-edit"
+                        >
+                          <svg viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setDeleteTarget(category);
+                            setDeleteType('category');
+                            setShowDeleteModal(true);
+                          }}
+                          className="btn-icon-small btn-delete"
+                        >
+                          <svg viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
                     {category.description && (
                       <p className="category-description">{category.description}</p>
@@ -1049,6 +1161,135 @@ export default function Admin() {
                 disabled={docCategoryIds.length === 0}
                 className="btn-primary"
                 style={{ opacity: docCategoryIds.length === 0 ? 0.5 : 1 }}
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit User Modal - NEW */}
+      {showEditUserModal && selectedUser && (
+        <div className="modal-overlay" onClick={() => setShowEditUserModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2 className="modal-title">Edit User</h2>
+              <button onClick={() => setShowEditUserModal(false)} className="modal-close">
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+            <div className="modal-body">
+              <div className="form-group">
+                <label className="form-label">User</label>
+                <div style={{ padding: '0.75rem', background: '#0f172a', borderRadius: '0.5rem', border: '1px solid #334155' }}>
+                  <div style={{ fontWeight: 600, marginBottom: '0.25rem' }}>{selectedUser.full_name}</div>
+                  <div style={{ fontSize: '0.875rem', color: '#94a3b8' }}>{selectedUser.email}</div>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Role</label>
+                <select
+                  value={editUserRole}
+                  onChange={(e) => setEditUserRole(e.target.value)}
+                  className="form-input"
+                >
+                  <option value="medewerker">Medewerker</option>
+                  <option value="manager">Manager</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Categories (Select at least one)</label>
+                <div className="checkbox-group">
+                  {categories.map((category) => (
+                    <label key={category.id} className="checkbox-label">
+                      <input
+                        type="checkbox"
+                        checked={editUserCategories.includes(category.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setEditUserCategories([...editUserCategories, category.id]);
+                          } else {
+                            setEditUserCategories(editUserCategories.filter(id => id !== category.id));
+                          }
+                        }}
+                      />
+                      <span>{category.name}</span>
+                      {category.description && (
+                        <span className="text-muted" style={{ fontSize: '0.875rem', marginLeft: '0.5rem' }}>
+                          — {category.description}
+                        </span>
+                      )}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button onClick={() => setShowEditUserModal(false)} className="btn-secondary">
+                Cancel
+              </button>
+              <button 
+                onClick={handleUpdateUser}
+                disabled={editUserCategories.length === 0}
+                className="btn-primary"
+                style={{ opacity: editUserCategories.length === 0 ? 0.5 : 1 }}
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Category Modal - NEW */}
+      {showEditCategoryModal && selectedCategory && (
+        <div className="modal-overlay" onClick={() => setShowEditCategoryModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2 className="modal-title">Edit Category</h2>
+              <button onClick={() => setShowEditCategoryModal(false)} className="modal-close">
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+            <div className="modal-body">
+              <div className="form-group">
+                <label className="form-label">Category Name *</label>
+                <input
+                  type="text"
+                  value={editCategoryName}
+                  onChange={(e) => setEditCategoryName(e.target.value)}
+                  className="form-input"
+                  placeholder="Enter category name"
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Description</label>
+                <textarea
+                  value={editCategoryDescription}
+                  onChange={(e) => setEditCategoryDescription(e.target.value)}
+                  className="form-textarea"
+                  placeholder="Enter category description (optional)"
+                  rows={3}
+                />
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button onClick={() => setShowEditCategoryModal(false)} className="btn-secondary">
+                Cancel
+              </button>
+              <button 
+                onClick={handleUpdateCategory}
+                disabled={!editCategoryName.trim()}
+                className="btn-primary"
+                style={{ opacity: !editCategoryName.trim() ? 0.5 : 1 }}
               >
                 Save Changes
               </button>
