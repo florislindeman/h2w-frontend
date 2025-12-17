@@ -171,9 +171,21 @@
 }
 
 .chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
   padding: 2rem;
   border-bottom: 1px solid #e2e8f0;
   background: white;
+}
+
+.chat-header > * {
+  flex: 0 1 auto;
+}
+
+.chat-header > div:first-child {
+  flex: 1 1 auto;
 }
 
 .chat-header h1 {
@@ -368,6 +380,38 @@
 .btn-send:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Primary Button (for header actions) */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  background: linear-gradient(135deg, #006B7D 0%, #00A8C5 100%);
+  border: none;
+  border-radius: 0.5rem;
+  color: white;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  flex: 0 0 auto;
+  width: auto;
+  max-width: max-content;
+  min-width: auto;
+  box-shadow: 0 2px 8px rgba(0, 107, 125, 0.2);
+}
+
+.btn-primary svg {
+  width: 18px;
+  height: 18px;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 107, 125, 0.3);
 }
 
 /* Upload View */
