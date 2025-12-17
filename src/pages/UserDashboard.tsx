@@ -76,15 +76,15 @@ export default function UserDashboard() {
     try {
       const token = localStorage.getItem('token');
       
-      // Use /query endpoint instead of /chat
-      const response = await fetch(`${API_URL}/query`, {
+      // Use /chat/ask endpoint (correct backend route)
+      const response = await fetch(`${API_URL}/chat/ask`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          query: inputMessage,
+          question: inputMessage,  // Backend expects "question", not "query"
         }),
       });
 
@@ -96,7 +96,7 @@ export default function UserDashboard() {
       
       const assistantMessage: Message = {
         role: 'assistant',
-        content: data.response || data.answer || 'Sorry, ik kon je vraag niet verwerken.',
+        content: data.answer || 'Sorry, ik kon je vraag niet verwerken.',
       };
       
       setMessages([...messages, userMessage, assistantMessage]);
