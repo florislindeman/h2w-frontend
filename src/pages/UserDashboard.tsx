@@ -184,14 +184,11 @@ export default function UserDashboard() {
       <aside className="user-sidebar">
         <div className="sidebar-header">
           <div className="sidebar-logo">
-            <div className="ncg-logo-sidebar">
-              <div className="logo-lines">
-                <div className="logo-line"></div>
-                <div className="logo-line"></div>
-                <div className="logo-line"></div>
-              </div>
-            </div>
-            <span>NCG Knowledge</span>
+            <img 
+              src="/images/new-concept-group-logo.jpeg" 
+              alt="New Concept Group" 
+              className="ncg-logo-image"
+            />
           </div>
         </div>
 
