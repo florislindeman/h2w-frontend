@@ -25,6 +25,7 @@ export default function UserDashboard() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
 
   useEffect(() => {
     // Check authentication
@@ -51,6 +52,13 @@ export default function UserDashboard() {
       navigate('/login');
     }
   }, [navigate]);
+
+  // Reset upload success when changing views
+  useEffect(() => {
+    if (activeView === 'upload') {
+      setUploadSuccess(false);
+    }
+  }, [activeView]);
 
   const fetchCategories = async () => {
     const token = localStorage.getItem('token');
@@ -140,11 +148,16 @@ export default function UserDashboard() {
       });
 
       if (response.ok) {
-        alert('Document uploaded successfully!');
+        setUploadSuccess(true);
         setSelectedFile(null);
         setUploadTitle('');
         setSelectedCategories([]);
-        setActiveView('chat');
+        
+        // Hide success banner after 3 seconds
+        setTimeout(() => {
+          setUploadSuccess(false);
+          setActiveView('chat');
+        }, 3000);
       } else {
         const error = await response.json();
         alert(`Upload failed: ${error.detail}`);
