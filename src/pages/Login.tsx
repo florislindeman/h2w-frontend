@@ -10,13 +10,6 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  
-  // Forgot Password State
-  const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [resetEmail, setResetEmail] = useState('');
-  const [resetSuccess, setResetSuccess] = useState(false);
-  const [resetError, setResetError] = useState('');
-  const [isResetting, setIsResetting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +23,7 @@ export default function Login() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email: email,
+          username: email,
           password: password,
         }),
       });
@@ -42,19 +35,12 @@ export default function Login() {
 
       const data = await response.json();
       
-      // Store token
+      // Store token and user data
       localStorage.setItem('token', data.access_token);
-      
-      // Store user data (construct user object from response)
-      const user = {
-        email: data.email,
-        role: data.role,
-        full_name: data.full_name || data.email.split('@')[0], // fallback to email username
-      };
-      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('user', JSON.stringify(data.user));
 
       // Role-based redirect
-      if (data.role === 'admin') {
+      if (data.user.role === 'admin') {
         navigate('/admin');
       } else {
         navigate('/dashboard');
@@ -66,237 +52,89 @@ export default function Login() {
     }
   };
 
-  const handleForgotPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setResetError('');
-    setResetSuccess(false);
-    setIsResetting(true);
-
-    try {
-      const response = await fetch(`${API_URL}/auth/forgot-password`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: resetEmail,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Password reset failed');
-      }
-
-      setResetSuccess(true);
-      setResetEmail('');
-      
-      // Close modal after 3 seconds
-      setTimeout(() => {
-        setShowForgotPassword(false);
-        setResetSuccess(false);
-      }, 3000);
-    } catch (err: any) {
-      setResetError(err.message || 'Failed to send reset email. Please contact your administrator.');
-    } finally {
-      setIsResetting(false);
-    }
-  };
-
   return (
-    <div className="login-wrapper">
-      <div className="login-background">
-        <div className="bg-shape shape-1"></div>
-        <div className="bg-shape shape-2"></div>
-        <div className="bg-shape shape-3"></div>
-      </div>
-
-      <div className="login-container">
-        <div className="login-card">
-          <div className="login-header">
-            <div className="logo-container">
-              <svg className="logo-icon" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-            <h1 className="login-title">Welcome Back</h1>
-            <p className="login-subtitle">Sign in to access your knowledge base</p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="login-form">
-            {error && (
-              <div className="alert alert-error">
-                <svg viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
-                <span>{error}</span>
-              </div>
-            )}
-
-            <div className="form-field">
-              <label htmlFor="email" className="field-label">Email Address</label>
-              <div className="input-wrapper">
-                <svg className="input-icon" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                </svg>
-                <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@company.com"
-                  className="field-input"
-                  required
-                  autoComplete="email"
-                />
-              </div>
-            </div>
-
-            <div className="form-field">
-              <label htmlFor="password" className="field-label">Password</label>
-              <div className="input-wrapper">
-                <svg className="input-icon" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                </svg>
-                <input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  className="field-input"
-                  required
-                  autoComplete="current-password"
-                />
-              </div>
-            </div>
-
-            <button type="submit" className="btn-submit" disabled={isLoading}>
-              {isLoading ? (
-                <>
-                  <span className="spinner"></span>
-                  <span>Signing in...</span>
-                </>
-              ) : (
-                <>
-                  <span>Sign In</span>
-                  <svg viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                  </svg>
-                </>
-              )}
-            </button>
-          </form>
-
-          <div className="login-footer">
-            <button 
-              type="button"
-              onClick={() => setShowForgotPassword(true)}
-              className="forgot-password-link"
-            >
-              Forgot your password?
-            </button>
-            <p className="footer-note">Need access? Contact your administrator</p>
-          </div>
+    <div className="login-container">
+      <div className="login-card">
+        <div className="login-header">
+          <img 
+            src="/images/new-concept-group-logo.jpeg" 
+            alt="New Concept Group" 
+            className="login-logo-image"
+          />
+          <h1>Welcome Back</h1>
+          <p>Sign in to access your knowledge base</p>
         </div>
-      </div>
 
-      {/* Forgot Password Modal */}
-      {showForgotPassword && (
-        <div className="modal-overlay" onClick={() => setShowForgotPassword(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>Reset Password</h2>
-              <button 
-                onClick={() => setShowForgotPassword(false)} 
-                className="modal-close"
-              >
-                <svg viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </button>
+        <form onSubmit={handleSubmit} className="login-form">
+          {error && (
+            <div className="error-message">
+              <svg viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+              {error}
             </div>
+          )}
 
-            {resetSuccess ? (
-              <div className="modal-body">
-                <div className="success-message">
-                  <svg viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <h3>Check your email</h3>
-                  <p>We've sent password reset instructions to your email address.</p>
-                </div>
-              </div>
+          <div className="form-group">
+            <label htmlFor="email" className="form-label">
+              <svg viewBox="0 0 20 20" fill="currentColor">
+                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+              </svg>
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              className="form-input"
+              required
+              autoComplete="email"
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="password" className="form-label">
+              <svg viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+              </svg>
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
+              className="form-input"
+              required
+              autoComplete="current-password"
+            />
+          </div>
+
+          <button type="submit" className="btn-login" disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <div className="spinner"></div>
+                Signing in...
+              </>
             ) : (
               <>
-                <div className="modal-body">
-                  <p className="modal-description">
-                    Enter your email address and we'll send you instructions to reset your password.
-                  </p>
-
-                  {resetError && (
-                    <div className="alert alert-error">
-                      <svg viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                      </svg>
-                      <span>{resetError}</span>
-                    </div>
-                  )}
-
-                  <form onSubmit={handleForgotPassword}>
-                    <div className="form-field">
-                      <label htmlFor="reset-email" className="field-label">Email Address</label>
-                      <div className="input-wrapper">
-                        <svg className="input-icon" viewBox="0 0 20 20" fill="currentColor">
-                          <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                          <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                        </svg>
-                        <input
-                          id="reset-email"
-                          type="email"
-                          value={resetEmail}
-                          onChange={(e) => setResetEmail(e.target.value)}
-                          placeholder="you@company.com"
-                          className="field-input"
-                          required
-                          autoComplete="email"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="modal-actions">
-                      <button
-                        type="button"
-                        onClick={() => setShowForgotPassword(false)}
-                        className="btn-secondary"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="submit"
-                        className="btn-submit"
-                        disabled={isResetting}
-                      >
-                        {isResetting ? (
-                          <>
-                            <span className="spinner"></span>
-                            <span>Sending...</span>
-                          </>
-                        ) : (
-                          <span>Send Reset Link</span>
-                        )}
-                      </button>
-                    </div>
-                  </form>
-                </div>
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M3 3a1 1 0 011 1v12a1 1 0 11-2 0V4a1 1 0 011-1zm7.707 3.293a1 1 0 010 1.414L9.414 9H17a1 1 0 110 2H9.414l1.293 1.293a1 1 0 01-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+                Sign In
               </>
             )}
-          </div>
+          </button>
+        </form>
+
+        <div className="login-footer">
+          <p>Don't have an account? Contact your administrator</p>
         </div>
-      )}
+      </div>
     </div>
   );
 }
