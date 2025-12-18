@@ -29,8 +29,21 @@ export default function Login() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Login failed');
+        let errorMessage = 'Login failed';
+        try {
+          const errorData = await response.json();
+          // Handle different error formats
+          if (typeof errorData.detail === 'string') {
+            errorMessage = errorData.detail;
+          } else if (errorData.detail && errorData.detail.message) {
+            errorMessage = errorData.detail.message;
+          } else if (errorData.message) {
+            errorMessage = errorData.message;
+          }
+        } catch {
+          errorMessage = `Login failed (${response.status})`;
+        }
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
@@ -46,7 +59,10 @@ export default function Login() {
         navigate('/dashboard');
       }
     } catch (err: any) {
-      setError(err.message || 'Invalid credentials');
+      // Ensure error is always a string
+      const errorMessage = err.message || 'Invalid credentials. Please try again.';
+      setError(String(errorMessage));
+      console.error('Login error:', err);
     } finally {
       setIsLoading(false);
     }
@@ -76,45 +92,43 @@ export default function Login() {
           )}
 
           <div className="form-group">
-            <label htmlFor="email" className="form-label">
-              <svg viewBox="0 0 20 20" fill="currentColor">
+            <label htmlFor="email">Email Address</label>
+            <div className="input-wrapper">
+              <svg className="input-icon" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
                 <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
               </svg>
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
-              className="form-input"
-              required
-              autoComplete="email"
-            />
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="your@email.com"
+                required
+                autoComplete="email"
+              />
+            </div>
           </div>
 
           <div className="form-group">
-            <label htmlFor="password" className="form-label">
-              <svg viewBox="0 0 20 20" fill="currentColor">
+            <label htmlFor="password">Password</label>
+            <div className="input-wrapper">
+              <svg className="input-icon" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
               </svg>
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-              className="form-input"
-              required
-              autoComplete="current-password"
-            />
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                autoComplete="current-password"
+              />
+            </div>
           </div>
 
-          <button type="submit" className="btn-login" disabled={isLoading}>
+          <button type="submit" disabled={isLoading} className="submit-button">
             {isLoading ? (
               <>
                 <div className="spinner"></div>
@@ -122,17 +136,18 @@ export default function Login() {
               </>
             ) : (
               <>
-                <svg viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M3 3a1 1 0 011 1v12a1 1 0 11-2 0V4a1 1 0 011-1zm7.707 3.293a1 1 0 010 1.414L9.414 9H17a1 1 0 110 2H9.414l1.293 1.293a1 1 0 01-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
                 Sign In
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
               </>
             )}
           </button>
         </form>
 
         <div className="login-footer">
-          <p>Don't have an account? Contact your administrator</p>
+          <a href="#" className="forgot-password">Forgot your password?</a>
+          <p className="contact-admin">Need access? Contact your administrator</p>
         </div>
       </div>
     </div>
