@@ -17,7 +17,9 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/auth/login`, {
+      // Try with 'username' field first
+      console.log('Attempting login with username field...');
+      let response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -27,6 +29,21 @@ export default function Login() {
           password: password,
         }),
       });
+
+      // If that fails with 422, try with 'email' field
+      if (!response.ok && response.status === 422) {
+        console.log('Retrying with email field instead...');
+        response = await fetch(`${API_URL}/auth/login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: email,
+            password: password,
+          }),
+        });
+      }
 
       if (!response.ok) {
         let errorMessage = 'Login failed. Please check your credentials.';
@@ -40,6 +57,9 @@ export default function Login() {
             errorMessage = errorData;
           } else if (typeof errorData.detail === 'string') {
             errorMessage = errorData.detail;
+          } else if (Array.isArray(errorData.detail)) {
+            // Handle array of errors (FastAPI validation errors)
+            errorMessage = errorData.detail.map((err: any) => err.msg || JSON.stringify(err)).join(', ');
           } else if (typeof errorData.detail === 'object' && errorData.detail !== null) {
             // Handle nested detail object
             if (errorData.detail.message) {
@@ -55,7 +75,7 @@ export default function Login() {
           
           // Add status code for debugging
           if (response.status === 401 || response.status === 422) {
-            if (!errorMessage.includes('credentials')) {
+            if (!errorMessage.includes('credentials') && !errorMessage.includes('password')) {
               errorMessage = 'Incorrect email or password. Please try again.';
             }
           }
