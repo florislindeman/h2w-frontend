@@ -29,24 +29,46 @@ export default function Login() {
       });
 
       if (!response.ok) {
-        let errorMessage = 'Login failed';
+        let errorMessage = 'Login failed. Please check your credentials.';
+        
         try {
           const errorData = await response.json();
-          // Handle different error formats
-          if (typeof errorData.detail === 'string') {
+          console.log('Error data from server:', errorData);
+          
+          // Try multiple ways to get the error message
+          if (typeof errorData === 'string') {
+            errorMessage = errorData;
+          } else if (typeof errorData.detail === 'string') {
             errorMessage = errorData.detail;
-          } else if (errorData.detail && errorData.detail.message) {
-            errorMessage = errorData.detail.message;
+          } else if (typeof errorData.detail === 'object' && errorData.detail !== null) {
+            // Handle nested detail object
+            if (errorData.detail.message) {
+              errorMessage = errorData.detail.message;
+            } else {
+              errorMessage = JSON.stringify(errorData.detail);
+            }
           } else if (errorData.message) {
             errorMessage = errorData.message;
+          } else if (errorData.error) {
+            errorMessage = errorData.error;
           }
-        } catch {
-          errorMessage = `Login failed (${response.status})`;
+          
+          // Add status code for debugging
+          if (response.status === 401 || response.status === 422) {
+            if (!errorMessage.includes('credentials')) {
+              errorMessage = 'Incorrect email or password. Please try again.';
+            }
+          }
+        } catch (parseError) {
+          console.error('Could not parse error response:', parseError);
+          errorMessage = `Login failed (Status: ${response.status}). Please check your credentials.`;
         }
+        
         throw new Error(errorMessage);
       }
 
       const data = await response.json();
+      console.log('Login successful:', data);
       
       // Store token and user data
       localStorage.setItem('token', data.access_token);
@@ -60,7 +82,7 @@ export default function Login() {
       }
     } catch (err: any) {
       // Ensure error is always a string
-      const errorMessage = err.message || 'Invalid credentials. Please try again.';
+      const errorMessage = err.message || 'An unexpected error occurred. Please try again.';
       setError(String(errorMessage));
       console.error('Login error:', err);
     } finally {
