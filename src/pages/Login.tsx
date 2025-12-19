@@ -90,14 +90,25 @@ export default function Login() {
       const data = await response.json();
       console.log('Login successful:', data);
       
+      // Handle both flat and nested user data structures
+      const user = data.user || {
+        email: data.email,
+        role: data.role,
+        id: data.id || data.user_id
+      };
+      
+      console.log('User object:', user);
+      
       // Store token and user data
       localStorage.setItem('token', data.access_token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.setItem('user', JSON.stringify(user));
 
       // Role-based redirect
-      if (data.user.role === 'admin') {
+      if (user.role === 'admin') {
+        console.log('Redirecting to admin...');
         navigate('/admin');
       } else {
+        console.log('Redirecting to dashboard...');
         navigate('/dashboard');
       }
     } catch (err: any) {
