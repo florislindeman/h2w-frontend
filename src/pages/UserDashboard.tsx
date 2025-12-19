@@ -207,10 +207,10 @@ export default function UserDashboard() {
         <div className="sidebar-footer">
           <div className="user-info">
             <div className="user-avatar">
-              {user.full_name.charAt(0).toUpperCase()}
+              {(user.full_name || user.email || 'U').charAt(0).toUpperCase()}
             </div>
             <div className="user-details">
-              <div className="user-name">{user.full_name}</div>
+              <div className="user-name">{user.full_name || user.email || 'User'}</div>
               <div className="user-role">{user.role}</div>
             </div>
           </div>
@@ -255,7 +255,7 @@ export default function UserDashboard() {
                     <div key={idx} className={`message ${msg.role}`}>
                       <div className="message-avatar">
                         {msg.role === 'user' ? (
-                          <span>{user.full_name.charAt(0).toUpperCase()}</span>
+                          <span>{(user.full_name || user.email || 'U').charAt(0).toUpperCase()}</span>
                         ) : (
                           <svg viewBox="0 0 24 24" fill="currentColor">
                             <path d="M12 2L2 7L12 12L22 7L12 2Z"/>
