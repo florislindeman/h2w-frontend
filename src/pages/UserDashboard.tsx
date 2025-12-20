@@ -10,14 +10,20 @@ interface Message {
 }
 
 interface Document {
-  id: number;
+  id: string;
   title: string;
-  filename: string;
   file_type: string;
-  uploaded_at: string;
-  uploaded_by: number;
-  uploader_email: string | null;
-  categories: { id: number; name: string }[];
+  file_name: string;
+  upload_date: string;
+  uploaded_by: string;
+  file_url: string;
+  categories?: Category[];
+}
+
+interface Category {
+  id: string;
+  name: string;
+  description?: string;
 }
 
 export default function UserDashboard() {
@@ -41,14 +47,15 @@ export default function UserDashboard() {
   // Documents State
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoadingDocs, setIsLoadingDocs] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const [showEditModal, setShowEditModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [editCategories, setEditCategories] = useState<string[]>([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteDocument, setDeleteDocument] = useState<Document | null>(null);
 
   useEffect(() => {
-    // Check authentication
     const userStr = localStorage.getItem('user');
     const token = localStorage.getItem('token');
     
@@ -59,13 +66,6 @@ export default function UserDashboard() {
     
     try {
       const userData = JSON.parse(userStr);
-      
-      // Redirect admin users to admin panel
-      if (userData.role === 'admin') {
-        navigate('/admin');
-        return;
-      }
-      
       setUser(userData);
       fetchCategories();
     } catch (error) {
@@ -86,13 +86,11 @@ export default function UserDashboard() {
     const token = localStorage.getItem('token');
     try {
       const response = await fetch(`${API_URL}/api/categories`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       if (response.ok) {
         const data = await response.json();
-        setCategories(data.categories || []);
+        setCategories(data.categories || data || []);
       }
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -104,83 +102,16 @@ export default function UserDashboard() {
     const token = localStorage.getItem('token');
     try {
       const response = await fetch(`${API_URL}/api/documents/my-documents`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       if (response.ok) {
         const data = await response.json();
-        setDocuments(data.documents || []);
+        setDocuments(data.documents || data || []);
       }
     } catch (error) {
       console.error('Error fetching documents:', error);
     } finally {
       setIsLoadingDocs(false);
-    }
-  };
-
-  const handleEditDocument = (doc: Document) => {
-    setSelectedDocument(doc);
-    setEditTitle(doc.title);
-    setEditCategories(doc.categories.map(c => c.id.toString()));
-    setShowEditModal(true);
-  };
-
-  const handleSaveEdit = async () => {
-    if (!selectedDocument) return;
-
-    const token = localStorage.getItem('token');
-    const formData = new FormData();
-    formData.append('title', editTitle);
-    formData.append('category_ids', editCategories.join(','));
-
-    try {
-      const response = await fetch(`${API_URL}/api/documents/${selectedDocument.id}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData
-      });
-
-      if (response.ok) {
-        setShowEditModal(false);
-        fetchDocuments(); // Refresh list
-      } else {
-        alert('Failed to update document');
-      }
-    } catch (error) {
-      console.error('Error updating document:', error);
-      alert('Error updating document');
-    }
-  };
-
-  const handleDeleteDocument = (doc: Document) => {
-    setSelectedDocument(doc);
-    setShowDeleteModal(true);
-  };
-
-  const confirmDelete = async () => {
-    if (!selectedDocument) return;
-
-    const token = localStorage.getItem('token');
-    try {
-      const response = await fetch(`${API_URL}/api/documents/${selectedDocument.id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (response.ok) {
-        setShowDeleteModal(false);
-        fetchDocuments(); // Refresh list
-      } else {
-        alert('Failed to delete document');
-      }
-    } catch (error) {
-      console.error('Error deleting document:', error);
-      alert('Error deleting document');
     }
   };
 
@@ -213,14 +144,13 @@ export default function UserDashboard() {
       } else {
         setMessages(prev => [...prev, {
           role: 'assistant',
-          content: 'Sorry, I encountered an error. Please try again.'
+          content: 'Sorry, I encountered an error.'
         }]);
       }
     } catch (error) {
-      console.error('Chat error:', error);
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: 'Sorry, I encountered an error. Please try again.'
+        content: 'Sorry, I encountered an error.'
       }]);
     } finally {
       setIsLoading(false);
@@ -236,14 +166,12 @@ export default function UserDashboard() {
     const formData = new FormData();
     formData.append('file', selectedFile);
     formData.append('title', uploadTitle);
-    formData.append('category_ids', selectedCategories.join(','));
+    formData.append('category_ids', JSON.stringify(selectedCategories));
 
     try {
       const response = await fetch(`${API_URL}/api/documents/upload`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
+        headers: { 'Authorization': `Bearer ${token}` },
         body: formData
       });
 
@@ -252,19 +180,77 @@ export default function UserDashboard() {
         setSelectedFile(null);
         setUploadTitle('');
         setSelectedCategories([]);
-        
         setTimeout(() => {
           setUploadSuccess(false);
-          setActiveView('chat');
-        }, 3000);
+          setActiveView('documents');
+        }, 2000);
       } else {
         alert('Upload failed');
       }
     } catch (error) {
-      console.error('Upload error:', error);
       alert('Upload error');
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  const handleEditDocument = (doc: Document) => {
+    setSelectedDocument(doc);
+    setEditTitle(doc.title);
+    setEditCategories(doc.categories?.map(c => c.id) || []);
+    setShowEditModal(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!selectedDocument) return;
+
+    const token = localStorage.getItem('token');
+    const payload = { title: editTitle, category_ids: editCategories };
+
+    try {
+      const response = await fetch(`${API_URL}/api/documents/${selectedDocument.id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (response.ok) {
+        setShowEditModal(false);
+        fetchDocuments();
+      } else {
+        alert('Failed to update');
+      }
+    } catch (error) {
+      alert('Error updating');
+    }
+  };
+
+  const handleDeleteClick = (doc: Document) => {
+    setDeleteDocument(doc);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteDocument) return;
+
+    const token = localStorage.getItem('token');
+    try {
+      const response = await fetch(`${API_URL}/api/documents/${deleteDocument.id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        setShowDeleteModal(false);
+        fetchDocuments();
+      } else {
+        alert('Failed to delete');
+      }
+    } catch (error) {
+      alert('Error deleting');
     }
   };
 
@@ -274,13 +260,18 @@ export default function UserDashboard() {
     navigate('/login');
   };
 
+  const filteredDocuments = documents.filter(doc =>
+    doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    doc.file_name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   if (!user) {
     return <div>Loading...</div>;
   }
 
   return (
     <div className="user-dashboard">
-      {/* Sidebar */}
+      {/* Sidebar - KEEP OLD STRUCTURE */}
       <aside className="user-sidebar">
         <div className="sidebar-header">
           <div className="sidebar-logo">
@@ -310,7 +301,17 @@ export default function UserDashboard() {
             <svg viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
             </svg>
-            My Documents
+            Documents
+          </button>
+
+          <button
+            onClick={() => setActiveView('upload')}
+            className={`nav-button ${activeView === 'upload' ? 'active' : ''}`}
+          >
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
+            </svg>
+            Upload
           </button>
         </nav>
 
@@ -333,67 +334,29 @@ export default function UserDashboard() {
         </div>
       </aside>
 
-      {/* Main Content */}
+      {/* Main Content - KEEP OLD STRUCTURE */}
       <main className="user-main">
-        {activeView === 'chat' ? (
+        {activeView === 'chat' && (
           <div className="chat-view">
             <div className="chat-header">
-              <div>
-                <h1>Ask Questions</h1>
-                <p>Get instant answers from our knowledge base</p>
-              </div>
-              <button onClick={() => setActiveView('upload')} className="btn-primary">
-                <svg viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                </svg>
-                Upload Document
-              </button>
+              <h1>Ask Questions</h1>
+              <p>Get instant answers from our knowledge base</p>
             </div>
 
             <div className="chat-messages">
               {messages.length === 0 ? (
                 <div className="empty-state">
-                  <svg viewBox="0 0 24 24" fill="none">
-                    <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
                   <h2>Start a conversation</h2>
-                  <p>Ask me anything about the documents in our knowledge base</p>
+                  <p>Ask me anything about the documents</p>
                 </div>
               ) : (
-                <>
-                  {messages.map((msg, idx) => (
-                    <div key={idx} className={`message ${msg.role}`}>
-                      <div className="message-avatar">
-                        {msg.role === 'user' ? (
-                          <span>{(user.full_name || user.email || 'U').charAt(0).toUpperCase()}</span>
-                        ) : (
-                          <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 2L2 7L12 12L22 7L12 2Z"/>
-                          </svg>
-                        )}
-                      </div>
-                      <div className="message-content">
-                        <p>{msg.content}</p>
-                      </div>
+                messages.map((msg, idx) => (
+                  <div key={idx} className={`message ${msg.role}`}>
+                    <div className="message-content">
+                      <p>{msg.content}</p>
                     </div>
-                  ))}
-                  {isLoading && (
-                    <div className="message assistant">
-                      <div className="message-avatar">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M12 2L2 7L12 12L22 7L12 2Z"/>
-                        </svg>
-                      </div>
-                      <div className="message-content">
-                        <div className="typing-indicator">
-                          <span></span>
-                          <span></span>
-                          <span></span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </>
+                  </div>
+                ))
               )}
             </div>
 
@@ -406,27 +369,21 @@ export default function UserDashboard() {
                 disabled={isLoading}
                 className="chat-input"
               />
-              <button type="submit" disabled={isLoading || !inputMessage.trim()} className="btn-send">
-                <svg viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-                </svg>
+              <button type="submit" disabled={isLoading} className="btn-send">
+                Send
               </button>
             </form>
           </div>
-        ) : activeView === 'upload' ? (
+        )}
+
+        {activeView === 'upload' && (
           <div className="upload-view">
             <div className="upload-header">
               <h1>Upload Document</h1>
-              <p>Add a new document to the knowledge base</p>
             </div>
 
             {uploadSuccess && (
-              <div className="success-banner">
-                <svg viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                Document uploaded successfully!
-              </div>
+              <div className="success-banner">Document uploaded successfully!</div>
             )}
 
             <form onSubmit={handleFileUpload} className="upload-form">
@@ -436,9 +393,7 @@ export default function UserDashboard() {
                   type="text"
                   value={uploadTitle}
                   onChange={(e) => setUploadTitle(e.target.value)}
-                  placeholder="Enter document title"
                   required
-                  className="form-input"
                 />
               </div>
 
@@ -447,159 +402,7 @@ export default function UserDashboard() {
                 <input
                   type="file"
                   onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-                  accept=".pdf,.doc,.docx,.txt"
                   required
-                  className="form-input"
-                />
-                {selectedFile && (
-                  <p className="file-info">{selectedFile.name}</p>
-                )}
-              </div>
-
-              <div className="form-group">
-                <label>Categories (Optional)</label>
-                <div className="category-grid">
-                  {categories.map(cat => (
-                    <label key={cat.id} className="category-checkbox">
-                      <input
-                        type="checkbox"
-                        checked={selectedCategories.includes(cat.id.toString())}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedCategories([...selectedCategories, cat.id.toString()]);
-                          } else {
-                            setSelectedCategories(selectedCategories.filter(id => id !== cat.id.toString()));
-                          }
-                        }}
-                      />
-                      <span>{cat.name}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              <div className="form-actions">
-                <button
-                  type="button"
-                  onClick={() => setActiveView('chat')}
-                  className="btn-secondary"
-                  disabled={isUploading}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="btn-primary"
-                  disabled={isUploading || !selectedFile || !uploadTitle.trim()}
-                >
-                  {isUploading ? 'Uploading...' : 'Upload Document'}
-                </button>
-              </div>
-            </form>
-          </div>
-        ) : (
-          <div className="documents-view">
-            <div className="documents-header">
-              <div>
-                <h1>My Documents</h1>
-                <p>{user.role === 'admin' ? 'Manage all documents' : 'Manage your uploaded documents'}</p>
-              </div>
-              <button onClick={() => setActiveView('upload')} className="btn-primary">
-                <svg viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
-                </svg>
-                Upload New
-              </button>
-            </div>
-
-            {isLoadingDocs ? (
-              <div className="loading-state">Loading documents...</div>
-            ) : documents.length === 0 ? (
-              <div className="empty-state">
-                <svg viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
-                </svg>
-                <h2>No documents yet</h2>
-                <p>Upload your first document to get started</p>
-                <button onClick={() => setActiveView('upload')} className="btn-primary">
-                  Upload Document
-                </button>
-              </div>
-            ) : (
-              <div className="documents-grid">
-                {documents.map(doc => (
-                  <div key={doc.id} className="document-card">
-                    <div className="document-icon">
-                      <svg viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <div className="document-info">
-                      <h3>{doc.title}</h3>
-                      <p className="document-filename">{doc.filename}</p>
-                      <div className="document-meta">
-                        <span>{new Date(doc.uploaded_at).toLocaleDateString()}</span>
-                        {user.role === 'admin' && doc.uploader_email && (
-                          <span>by {doc.uploader_email}</span>
-                        )}
-                      </div>
-                      {doc.categories.length > 0 && (
-                        <div className="document-categories">
-                          {doc.categories.map(cat => (
-                            <span key={cat.id} className="category-badge">{cat.name}</span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    <div className="document-actions">
-                      <button
-                        onClick={() => handleEditDocument(doc)}
-                        className="btn-icon"
-                        title="Edit"
-                      >
-                        <svg viewBox="0 0 20 20" fill="currentColor">
-                          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                        </svg>
-                      </button>
-                      <button
-                        onClick={() => handleDeleteDocument(doc)}
-                        className="btn-icon btn-danger"
-                        title="Delete"
-                      >
-                        <svg viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-      </main>
-
-      {/* Edit Modal */}
-      {showEditModal && selectedDocument && (
-        <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>Edit Document</h2>
-              <button onClick={() => setShowEditModal(false)} className="btn-close">
-                <svg viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </button>
-            </div>
-
-            <div className="modal-body">
-              <div className="form-group">
-                <label>Document Title</label>
-                <input
-                  type="text"
-                  value={editTitle}
-                  onChange={(e) => setEditTitle(e.target.value)}
-                  className="form-input"
                 />
               </div>
 
@@ -610,12 +413,12 @@ export default function UserDashboard() {
                     <label key={cat.id} className="category-checkbox">
                       <input
                         type="checkbox"
-                        checked={editCategories.includes(cat.id.toString())}
+                        checked={selectedCategories.includes(cat.id)}
                         onChange={(e) => {
                           if (e.target.checked) {
-                            setEditCategories([...editCategories, cat.id.toString()]);
+                            setSelectedCategories([...selectedCategories, cat.id]);
                           } else {
-                            setEditCategories(editCategories.filter(id => id !== cat.id.toString()));
+                            setSelectedCategories(selectedCategories.filter(id => id !== cat.id));
                           }
                         }}
                       />
@@ -624,45 +427,142 @@ export default function UserDashboard() {
                   ))}
                 </div>
               </div>
+
+              <div className="form-actions">
+                <button type="button" onClick={() => setActiveView('chat')} className="btn-secondary">
+                  Cancel
+                </button>
+                <button type="submit" disabled={isUploading} className="btn-primary">
+                  {isUploading ? 'Uploading...' : 'Upload'}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {activeView === 'documents' && (
+          <div className="documents-view">
+            <div className="documents-header">
+              <h1>My Documents</h1>
+              <input
+                type="text"
+                placeholder="Search documents..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="search-input"
+              />
             </div>
 
-            <div className="modal-footer">
-              <button onClick={() => setShowEditModal(false)} className="btn-secondary">
-                Cancel
-              </button>
-              <button onClick={handleSaveEdit} className="btn-primary">
-                Save Changes
-              </button>
+            {isLoadingDocs ? (
+              <div className="loading">Loading...</div>
+            ) : filteredDocuments.length === 0 ? (
+              <div className="empty-state">
+                <h2>No documents found</h2>
+                <button onClick={() => setActiveView('upload')} className="btn-primary">
+                  Upload Document
+                </button>
+              </div>
+            ) : (
+              <div className="doc-table-container">
+                <table className="doc-table">
+                  <thead>
+                    <tr>
+                      <th>Document</th>
+                      <th>Type</th>
+                      <th>Date</th>
+                      <th>Categories</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredDocuments.map(doc => (
+                      <tr key={doc.id}>
+                        <td>
+                          <div className="doc-cell">
+                            <div className="doc-title">{doc.title}</div>
+                            <div className="doc-filename">{doc.file_name}</div>
+                          </div>
+                        </td>
+                        <td><span className="type-badge">{doc.file_type}</span></td>
+                        <td>{new Date(doc.upload_date).toLocaleDateString()}</td>
+                        <td>
+                          <div className="cat-badges">
+                            {doc.categories?.map(cat => (
+                              <span key={cat.id} className="cat-badge">{cat.name}</span>
+                            ))}
+                          </div>
+                        </td>
+                        <td>
+                          <div className="action-btns">
+                            <button onClick={() => handleEditDocument(doc)} className="btn-edit" title="Edit">
+                              ✏️
+                            </button>
+                            <button onClick={() => handleDeleteClick(doc)} className="btn-delete" title="Delete">
+                              🗑️
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+      </main>
+
+      {/* Edit Modal */}
+      {showEditModal && selectedDocument && (
+        <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h2>Edit Document</h2>
+            <div className="form-group">
+              <label>Title</label>
+              <input
+                type="text"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+              />
+            </div>
+            <div className="form-group">
+              <label>Categories</label>
+              <div className="category-grid">
+                {categories.map(cat => (
+                  <label key={cat.id} className="category-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={editCategories.includes(cat.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setEditCategories([...editCategories, cat.id]);
+                        } else {
+                          setEditCategories(editCategories.filter(id => id !== cat.id));
+                        }
+                      }}
+                    />
+                    <span>{cat.name}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div className="modal-actions">
+              <button onClick={() => setShowEditModal(false)} className="btn-secondary">Cancel</button>
+              <button onClick={handleSaveEdit} className="btn-primary">Save</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
-      {showDeleteModal && selectedDocument && (
+      {/* Delete Modal */}
+      {showDeleteModal && deleteDocument && (
         <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>
-          <div className="modal-content modal-small" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>Delete Document</h2>
-              <button onClick={() => setShowDeleteModal(false)} className="btn-close">
-                <svg viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </button>
-            </div>
-
-            <div className="modal-body">
-              <p>Are you sure you want to delete <strong>{selectedDocument.title}</strong>?</p>
-              <p className="text-muted">This action cannot be undone.</p>
-            </div>
-
-            <div className="modal-footer">
-              <button onClick={() => setShowDeleteModal(false)} className="btn-secondary">
-                Cancel
-              </button>
-              <button onClick={confirmDelete} className="btn-danger">
-                Delete Document
-              </button>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h2>Delete Document</h2>
+            <p>Are you sure you want to delete <strong>{deleteDocument.title}</strong>?</p>
+            <div className="modal-actions">
+              <button onClick={() => setShowDeleteModal(false)} className="btn-secondary">Cancel</button>
+              <button onClick={confirmDelete} className="btn-danger">Delete</button>
             </div>
           </div>
         </div>
