@@ -131,7 +131,7 @@ export default function Admin() {
     const token = localStorage.getItem('token');
     
     try {
-      const docsRes = await fetch(`${API_URL}/documents/`, {
+      const docsRes = await fetch(`${API_URL}/api/documents/`, {
         method: 'GET',
         mode: 'cors',
         credentials: 'include',
@@ -143,7 +143,7 @@ export default function Admin() {
       const docsData = await docsRes.json();
       setDocuments(docsData);
 
-      const usersRes = await fetch(`${API_URL}/users/`, {
+      const usersRes = await fetch(`${API_URL}/api/users/`, {
         method: 'GET',
         mode: 'cors',
         credentials: 'include',
@@ -155,7 +155,7 @@ export default function Admin() {
       const usersData = await usersRes.json();
       setUsers(usersData);
 
-      const catsRes = await fetch(`${API_URL}/categories/`, {
+      const catsRes = await fetch(`${API_URL}/api/categories/`, {
         method: 'GET',
         mode: 'cors',
         credentials: 'include',
@@ -203,7 +203,7 @@ export default function Admin() {
     formData.append('category_ids', JSON.stringify(uploadCategories));
 
     try {
-      const response = await fetch(`${API_URL}/documents/upload`, {
+      const response = await fetch(`${API_URL}/api/documents/upload`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -239,7 +239,7 @@ export default function Admin() {
   const handleDeleteDocument = async (docId: string) => {
     const token = localStorage.getItem('token');
     try {
-      await fetch(`${API_URL}/documents/${docId}`, {
+      await fetch(`${API_URL}/api/documents/${docId}`, {
         method: 'DELETE',
         mode: 'cors',
         credentials: 'include',
@@ -261,7 +261,7 @@ export default function Admin() {
   const handleDeleteUser = async (userId: string) => {
     const token = localStorage.getItem('token');
     try {
-      await fetch(`${API_URL}/users/${userId}`, {
+      await fetch(`${API_URL}/api/users/${userId}`, {
         method: 'DELETE',
         mode: 'cors',
         credentials: 'include',
@@ -283,7 +283,7 @@ export default function Admin() {
   const handleDeleteCategory = async (categoryId: string) => {
     const token = localStorage.getItem('token');
     try {
-      await fetch(`${API_URL}/categories/${categoryId}`, {
+      await fetch(`${API_URL}/api/categories/${categoryId}`, {
         method: 'DELETE',
         mode: 'cors',
         credentials: 'include',
@@ -350,7 +350,7 @@ export default function Admin() {
     
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`${API_URL}/categories/`, {
+      const response = await fetch(`${API_URL}/api/categories/`, {
         method: 'POST',
         mode: 'cors',
         credentials: 'include',
@@ -377,7 +377,7 @@ export default function Admin() {
     const token = localStorage.getItem('token');
     
     try {
-      const response = await fetch(`${API_URL}/documents/${selectedDoc.id}`, {
+      const response = await fetch(`${API_URL}/api/documents/${selectedDoc.id}`, {
         method: 'PUT',
         mode: 'cors',
         credentials: 'include',
@@ -410,7 +410,7 @@ export default function Admin() {
     const token = localStorage.getItem('token');
     
     try {
-      const response = await fetch(`${API_URL}/users/${selectedUser.id}`, {
+      const response = await fetch(`${API_URL}/api/users/${selectedUser.id}`, {
         method: 'PUT',
         mode: 'cors',
         credentials: 'include',
@@ -446,7 +446,7 @@ export default function Admin() {
     const token = localStorage.getItem('token');
     
     try {
-      const response = await fetch(`${API_URL}/categories/${selectedCategory.id}`, {
+      const response = await fetch(`${API_URL}/api/categories/${selectedCategory.id}`, {
         method: 'PUT',
         mode: 'cors',
         credentials: 'include',
