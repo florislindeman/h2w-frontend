@@ -201,48 +201,6 @@ export default function UserDashboard() {
     setShowEditModal(true);
   };
 
-  const handleDownloadDocument = async (doc: Document) => {
-    const token = localStorage.getItem('token');
-    try {
-      const response = await fetch(`${API_URL}/api/documents/${doc.id}/download`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
-      if (!response.ok) {
-        if (response.status === 403) {
-          alert('You do not have permission to download this document');
-        } else {
-          alert('Failed to download document');
-        }
-        return;
-      }
-
-      // Get filename from Content-Disposition header or use doc filename
-      const contentDisposition = response.headers.get('Content-Disposition');
-      let filename = doc.file_name;
-      if (contentDisposition) {
-        const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
-        if (filenameMatch) {
-          filename = filenameMatch[1];
-        }
-      }
-
-      // Create blob and download
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (error) {
-      console.error('Error downloading document:', error);
-      alert('Error downloading document');
-    }
-  };
-
   const handleSaveEdit = async () => {
     if (!selectedDocument) return;
 
@@ -536,9 +494,6 @@ export default function UserDashboard() {
                         </td>
                         <td>
                           <div className="action-btns">
-                            <button onClick={() => handleDownloadDocument(doc)} className="btn-download" title="Download">
-                              📥
-                            </button>
                             <button onClick={() => handleEditDocument(doc)} className="btn-edit" title="Edit">
                               ✏️
                             </button>
