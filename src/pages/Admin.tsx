@@ -258,6 +258,46 @@ export default function Admin() {
     }
   };
 
+  const handleDownloadDocument = async (doc: Document) => {
+    const token = localStorage.getItem('token');
+    try {
+      const response = await fetch(`${API_URL}/api/documents/${doc.id}/download`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (!response.ok) {
+        alert('Failed to download document');
+        return;
+      }
+
+      // Get filename from Content-Disposition header or use doc filename
+      const contentDisposition = response.headers.get('Content-Disposition');
+      let filename = doc.file_name;
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
+        if (filenameMatch) {
+          filename = filenameMatch[1];
+        }
+      }
+
+      // Create blob and download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      addAuditLog('DOWNLOAD_DOCUMENT', `Downloaded: ${doc.title}`);
+    } catch (error) {
+      console.error('Error downloading document:', error);
+      alert('Error downloading document');
+    }
+  };
+
   const handleDeleteUser = async (userId: string) => {
     const token = localStorage.getItem('token');
     try {
@@ -639,6 +679,15 @@ export default function Admin() {
                         </td>
                         <td>
                           <div className="action-buttons">
+                            <button
+                              onClick={() => handleDownloadDocument(doc)}
+                              className="btn-icon btn-download"
+                              title="Download"
+                            >
+                              <svg viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                              </svg>
+                            </button>
                             <button
                               onClick={() => {
                                 setSelectedDoc(doc);
