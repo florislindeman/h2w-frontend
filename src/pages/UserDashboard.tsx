@@ -260,6 +260,20 @@ export default function UserDashboard() {
     navigate('/login');
   };
 
+  const getFileIcon = (fileType: string) => {
+    const icons: Record<string, string> = {
+      pdf: '📄',
+      docx: '📝',
+      doc: '📝',
+      xlsx: '📊',
+      xls: '📊',
+      pptx: '📊',
+      ppt: '📊',
+      txt: '📃',
+    };
+    return icons[fileType.toLowerCase()] || '📎';
+  };
+
   const filteredDocuments = documents.filter(doc =>
     doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     doc.file_name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -271,7 +285,7 @@ export default function UserDashboard() {
 
   return (
     <div className="user-dashboard">
-      {/* Sidebar - KEEP OLD STRUCTURE */}
+      {/* Sidebar */}
       <aside className="user-sidebar">
         <div className="sidebar-header">
           <div className="sidebar-logo">
@@ -334,7 +348,7 @@ export default function UserDashboard() {
         </div>
       </aside>
 
-      {/* Main Content - KEEP OLD STRUCTURE */}
+      {/* Main Content */}
       <main className="user-main">
         {activeView === 'chat' && (
           <div className="chat-view">
@@ -441,20 +455,25 @@ export default function UserDashboard() {
         )}
 
         {activeView === 'documents' && (
-          <div className="documents-view">
-            <div className="documents-header">
-              <h1>My Documents</h1>
-              <input
-                type="text"
-                placeholder="Search documents..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input"
-              />
-            </div>
+          <div className="admin-documents-view">
+            <header className="admin-header">
+              <div>
+                <h1 className="admin-title">My Documents</h1>
+                <p className="admin-subtitle">View and manage your documents</p>
+              </div>
+              <button onClick={() => setActiveView('upload')} className="btn-primary">
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                </svg>
+                Upload Document
+              </button>
+            </header>
 
             {isLoadingDocs ? (
-              <div className="loading">Loading...</div>
+              <div className="loading-container">
+                <div className="spinner"></div>
+                <p>Loading documents...</p>
+              </div>
             ) : filteredDocuments.length === 0 ? (
               <div className="empty-state">
                 <h2>No documents found</h2>
@@ -463,42 +482,59 @@ export default function UserDashboard() {
                 </button>
               </div>
             ) : (
-              <div className="doc-table-container">
-                <table className="doc-table">
+              <div className="admin-table-container">
+                <table className="admin-table">
                   <thead>
                     <tr>
-                      <th>Document</th>
-                      <th>Type</th>
-                      <th>Date</th>
-                      <th>Categories</th>
-                      <th>Actions</th>
+                      <th>DOCUMENT</th>
+                      <th>TYPE</th>
+                      <th>UPLOAD DATE</th>
+                      <th>CATEGORIES</th>
+                      <th>ACTIONS</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredDocuments.map(doc => (
+                    {filteredDocuments.map((doc) => (
                       <tr key={doc.id}>
                         <td>
                           <div className="doc-cell">
-                            <div className="doc-title">{doc.title}</div>
-                            <div className="doc-filename">{doc.file_name}</div>
-                          </div>
-                        </td>
-                        <td><span className="type-badge">{doc.file_type}</span></td>
-                        <td>{new Date(doc.upload_date).toLocaleDateString()}</td>
-                        <td>
-                          <div className="cat-badges">
-                            {doc.categories?.map(cat => (
-                              <span key={cat.id} className="cat-badge">{cat.name}</span>
-                            ))}
+                            <span className="doc-icon">{getFileIcon(doc.file_type)}</span>
+                            <div>
+                              <div className="doc-title">{doc.title}</div>
+                              <div className="doc-filename">{doc.file_name}</div>
+                            </div>
                           </div>
                         </td>
                         <td>
-                          <div className="action-btns">
-                            <button onClick={() => handleEditDocument(doc)} className="btn-edit" title="Edit">
-                              ✏️
+                          <span className="type-badge">{doc.file_type.toUpperCase()}</span>
+                        </td>
+                        <td>{new Date(doc.upload_date).toLocaleDateString('nl-NL')}</td>
+                        <td>
+                          <div className="category-pills">
+                            {doc.categories?.map((cat) => (
+                              <span key={cat.id} className="category-pill">{cat.name}</span>
+                            )) || <span className="text-muted">No categories</span>}
+                          </div>
+                        </td>
+                        <td>
+                          <div className="action-buttons">
+                            <button
+                              onClick={() => handleEditDocument(doc)}
+                              className="btn-icon btn-edit"
+                              title="Edit"
+                            >
+                              <svg viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                              </svg>
                             </button>
-                            <button onClick={() => handleDeleteClick(doc)} className="btn-delete" title="Delete">
-                              🗑️
+                            <button
+                              onClick={() => handleDeleteClick(doc)}
+                              className="btn-icon btn-delete"
+                              title="Delete"
+                            >
+                              <svg viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                              </svg>
                             </button>
                           </div>
                         </td>
@@ -516,37 +552,47 @@ export default function UserDashboard() {
       {showEditModal && selectedDocument && (
         <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h2>Edit Document</h2>
-            <div className="form-group">
-              <label>Title</label>
-              <input
-                type="text"
-                value={editTitle}
-                onChange={(e) => setEditTitle(e.target.value)}
-              />
+            <div className="modal-header">
+              <h2 className="modal-title">Edit Document</h2>
+              <button onClick={() => setShowEditModal(false)} className="modal-close">
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
             </div>
-            <div className="form-group">
-              <label>Categories</label>
-              <div className="category-grid">
-                {categories.map(cat => (
-                  <label key={cat.id} className="category-checkbox">
-                    <input
-                      type="checkbox"
-                      checked={editCategories.includes(cat.id)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setEditCategories([...editCategories, cat.id]);
-                        } else {
-                          setEditCategories(editCategories.filter(id => id !== cat.id));
-                        }
-                      }}
-                    />
-                    <span>{cat.name}</span>
-                  </label>
-                ))}
+            <div className="modal-body">
+              <div className="form-group">
+                <label className="form-label">Title</label>
+                <input
+                  type="text"
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="form-input"
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Categories</label>
+                <div className="category-grid">
+                  {categories.map(cat => (
+                    <label key={cat.id} className="category-checkbox">
+                      <input
+                        type="checkbox"
+                        checked={editCategories.includes(cat.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setEditCategories([...editCategories, cat.id]);
+                          } else {
+                            setEditCategories(editCategories.filter(id => id !== cat.id));
+                          }
+                        }}
+                      />
+                      <span>{cat.name}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
             </div>
-            <div className="modal-actions">
+            <div className="modal-footer">
               <button onClick={() => setShowEditModal(false)} className="btn-secondary">Cancel</button>
               <button onClick={handleSaveEdit} className="btn-primary">Save</button>
             </div>
@@ -557,10 +603,19 @@ export default function UserDashboard() {
       {/* Delete Modal */}
       {showDeleteModal && deleteDocument && (
         <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h2>Delete Document</h2>
-            <p>Are you sure you want to delete <strong>{deleteDocument.title}</strong>?</p>
-            <div className="modal-actions">
+          <div className="modal-content modal-small" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2 className="modal-title">Delete Document</h2>
+              <button onClick={() => setShowDeleteModal(false)} className="modal-close">
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+            <div className="modal-body">
+              <p>Are you sure you want to delete <strong>{deleteDocument.title}</strong>?</p>
+            </div>
+            <div className="modal-footer">
               <button onClick={() => setShowDeleteModal(false)} className="btn-secondary">Cancel</button>
               <button onClick={confirmDelete} className="btn-danger">Delete</button>
             </div>
