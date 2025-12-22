@@ -47,7 +47,6 @@ export default function UserDashboard() {
   // Documents State
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoadingDocs, setIsLoadingDocs] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const [editTitle, setEditTitle] = useState('');
@@ -106,7 +105,7 @@ export default function UserDashboard() {
       });
       if (response.ok) {
         const data = await response.json();
-        setDocuments(data.documents || data || []);
+        setDocuments(data || []);
       }
     } catch (error) {
       console.error('Error fetching documents:', error);
@@ -274,17 +273,12 @@ export default function UserDashboard() {
     return icons[fileType.toLowerCase()] || '📎';
   };
 
-  const filteredDocuments = documents.filter(doc =>
-    doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    doc.file_name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   if (!user) {
     return <div>Loading...</div>;
   }
 
   return (
-    <div className="user-dashboard">
+    <div className="dashboard-container">
       {/* Sidebar */}
       <aside className="user-sidebar">
         <div className="sidebar-header">
@@ -350,22 +344,28 @@ export default function UserDashboard() {
 
       {/* Main Content */}
       <main className="user-main">
+        {/* CHAT VIEW */}
         {activeView === 'chat' && (
           <div className="chat-view">
             <div className="chat-header">
-              <h1>Ask Questions</h1>
-              <p>Get instant answers from our knowledge base</p>
+              <div>
+                <h1>Ask Questions</h1>
+                <p>Get instant answers from our knowledge base</p>
+              </div>
             </div>
 
-            <div className="chat-messages">
+            <div className="chat-container">
               {messages.length === 0 ? (
                 <div className="empty-state">
-                  <h2>Start a conversation</h2>
+                  <h3>Start a conversation</h3>
                   <p>Ask me anything about the documents</p>
                 </div>
               ) : (
                 messages.map((msg, idx) => (
                   <div key={idx} className={`message ${msg.role}`}>
+                    <div className="message-avatar">
+                      {msg.role === 'assistant' ? 'AI' : user.full_name?.charAt(0) || 'U'}
+                    </div>
                     <div className="message-content">
                       <p>{msg.content}</p>
                     </div>
@@ -374,57 +374,100 @@ export default function UserDashboard() {
               )}
             </div>
 
-            <form onSubmit={handleSendMessage} className="chat-input-form">
-              <input
-                type="text"
-                value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
-                placeholder="Type your question..."
-                disabled={isLoading}
-                className="chat-input"
-              />
-              <button type="submit" disabled={isLoading} className="btn-send">
-                Send
-              </button>
-            </form>
+            <div className="chat-input-container">
+              <form onSubmit={handleSendMessage} className="chat-input-wrapper">
+                <textarea
+                  value={inputMessage}
+                  onChange={(e) => setInputMessage(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendMessage(e);
+                    }
+                  }}
+                  placeholder="Type your question..."
+                  disabled={isLoading}
+                  className="chat-input"
+                  rows={1}
+                />
+                <button type="submit" disabled={isLoading} className="btn-send">
+                  <svg viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                  </svg>
+                </button>
+              </form>
+            </div>
           </div>
         )}
 
+        {/* UPLOAD VIEW */}
         {activeView === 'upload' && (
           <div className="upload-view">
             <div className="upload-header">
               <h1>Upload Document</h1>
+              <p>Add new documents to the knowledge base</p>
             </div>
 
-            {uploadSuccess && (
-              <div className="success-banner">Document uploaded successfully!</div>
-            )}
+            <div className="upload-section">
+              {uploadSuccess && (
+                <div className="success-banner">
+                  <svg viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  Document uploaded successfully!
+                </div>
+              )}
 
-            <form onSubmit={handleFileUpload} className="upload-form">
-              <div className="form-group">
-                <label>Document Title</label>
-                <input
-                  type="text"
-                  value={uploadTitle}
-                  onChange={(e) => setUploadTitle(e.target.value)}
-                  required
-                />
-              </div>
+              <form onSubmit={handleFileUpload}>
+                <div className="file-drop-zone">
+                  <label htmlFor="file-upload" className="file-drop-label">
+                    {selectedFile ? (
+                      <div className="selected-file">
+                        <svg viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        <div className="file-info">
+                          <p>{selectedFile.name}</p>
+                          <span>{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <svg viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                        </svg>
+                        <div className="file-info">
+                          <p>Click to upload or drag and drop</p>
+                          <span>PDF, DOCX, XLSX (max. 50MB)</span>
+                        </div>
+                      </>
+                    )}
+                  </label>
+                  <input
+                    id="file-upload"
+                    type="file"
+                    onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                    className="file-input"
+                    required
+                  />
+                </div>
 
-              <div className="form-group">
-                <label>Select File</label>
-                <input
-                  type="file"
-                  onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-                  required
-                />
-              </div>
+                <div className="form-group">
+                  <label className="form-label">Document Title</label>
+                  <input
+                    type="text"
+                    value={uploadTitle}
+                    onChange={(e) => setUploadTitle(e.target.value)}
+                    className="form-input"
+                    placeholder="Enter document title"
+                    required
+                  />
+                </div>
 
-              <div className="form-group">
-                <label>Categories</label>
-                <div className="category-grid">
+                <div className="categories-section">
+                  <label className="form-label">Categories (Select at least one)</label>
                   {categories.map(cat => (
-                    <label key={cat.id} className="category-checkbox">
+                    <label key={cat.id} className="category-checkbox-item">
                       <input
                         type="checkbox"
                         checked={selectedCategories.includes(cat.id)}
@@ -436,24 +479,26 @@ export default function UserDashboard() {
                           }
                         }}
                       />
-                      <span>{cat.name}</span>
+                      <label>{cat.name}</label>
                     </label>
                   ))}
                 </div>
-              </div>
 
-              <div className="form-actions">
-                <button type="button" onClick={() => setActiveView('chat')} className="btn-secondary">
-                  Cancel
-                </button>
-                <button type="submit" disabled={isUploading} className="btn-primary">
-                  {isUploading ? 'Uploading...' : 'Upload'}
-                </button>
-              </div>
-            </form>
+                <div className="upload-actions">
+                  <button type="button" onClick={() => setActiveView('documents')} className="btn-cancel">
+                    Cancel
+                  </button>
+                  <button type="submit" disabled={isUploading} className="btn-upload">
+                    {isUploading && <div className="spinner-small" />}
+                    {isUploading ? 'Uploading...' : 'Upload Document'}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         )}
 
+        {/* DOCUMENTS VIEW - ADMIN STYLE */}
         {activeView === 'documents' && (
           <div className="admin-documents-view">
             <header className="admin-header">
@@ -474,9 +519,13 @@ export default function UserDashboard() {
                 <div className="spinner"></div>
                 <p>Loading documents...</p>
               </div>
-            ) : filteredDocuments.length === 0 ? (
+            ) : documents.length === 0 ? (
               <div className="empty-state">
-                <h2>No documents found</h2>
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
+                </svg>
+                <h3>No documents found</h3>
+                <p>Upload your first document to get started</p>
                 <button onClick={() => setActiveView('upload')} className="btn-primary">
                   Upload Document
                 </button>
@@ -494,7 +543,7 @@ export default function UserDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredDocuments.map((doc) => (
+                    {documents.map((doc) => (
                       <tr key={doc.id}>
                         <td>
                           <div className="doc-cell">
@@ -511,9 +560,13 @@ export default function UserDashboard() {
                         <td>{new Date(doc.upload_date).toLocaleDateString('nl-NL')}</td>
                         <td>
                           <div className="category-pills">
-                            {doc.categories?.map((cat) => (
-                              <span key={cat.id} className="category-pill">{cat.name}</span>
-                            )) || <span className="text-muted">No categories</span>}
+                            {doc.categories && doc.categories.length > 0 ? (
+                              doc.categories.map((cat) => (
+                                <span key={cat.id} className="category-pill">{cat.name}</span>
+                              ))
+                            ) : (
+                              <span className="text-muted">No categories</span>
+                            )}
                           </div>
                         </td>
                         <td>
@@ -594,7 +647,7 @@ export default function UserDashboard() {
             </div>
             <div className="modal-footer">
               <button onClick={() => setShowEditModal(false)} className="btn-secondary">Cancel</button>
-              <button onClick={handleSaveEdit} className="btn-primary">Save</button>
+              <button onClick={handleSaveEdit} className="btn-primary">Save Changes</button>
             </div>
           </div>
         </div>
@@ -614,6 +667,7 @@ export default function UserDashboard() {
             </div>
             <div className="modal-body">
               <p>Are you sure you want to delete <strong>{deleteDocument.title}</strong>?</p>
+              <p className="text-muted" style={{marginTop: '0.5rem'}}>This action cannot be undone.</p>
             </div>
             <div className="modal-footer">
               <button onClick={() => setShowDeleteModal(false)} className="btn-secondary">Cancel</button>
