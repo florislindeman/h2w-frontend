@@ -83,16 +83,37 @@ export default function UserDashboard() {
 
   const fetchCategories = async () => {
     const token = localStorage.getItem('token');
+    console.log('[CATEGORIES] Fetching categories...');
     try {
       const response = await fetch(`${API_URL}/api/categories`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
+      
+      console.log('[CATEGORIES] Response status:', response.status);
+      
       if (response.ok) {
         const data = await response.json();
-        setCategories(data.categories || data || []);
+        console.log('[CATEGORIES] Raw data:', data);
+        
+        // Handle different response formats
+        let categoriesList = [];
+        if (Array.isArray(data)) {
+          categoriesList = data;
+        } else if (data.categories && Array.isArray(data.categories)) {
+          categoriesList = data.categories;
+        } else if (data.data && Array.isArray(data.data)) {
+          categoriesList = data.data;
+        }
+        
+        console.log('[CATEGORIES] Processed categories:', categoriesList);
+        setCategories(categoriesList);
+      } else {
+        console.error('[CATEGORIES] Failed to fetch:', response.status, response.statusText);
+        const errorText = await response.text();
+        console.error('[CATEGORIES] Error response:', errorText);
       }
     } catch (error) {
-      console.error('Error fetching categories:', error);
+      console.error('[CATEGORIES] Exception:', error);
     }
   };
 
@@ -466,22 +487,31 @@ export default function UserDashboard() {
 
                 <div className="categories-section">
                   <label className="form-label">Categories (Select at least one)</label>
-                  {categories.map(cat => (
-                    <label key={cat.id} className="category-checkbox-item">
-                      <input
-                        type="checkbox"
-                        checked={selectedCategories.includes(cat.id)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedCategories([...selectedCategories, cat.id]);
-                          } else {
-                            setSelectedCategories(selectedCategories.filter(id => id !== cat.id));
-                          }
-                        }}
-                      />
-                      <label>{cat.name}</label>
-                    </label>
-                  ))}
+                  {categories.length === 0 ? (
+                    <div className="error-message" style={{marginTop: '0.5rem'}}>
+                      <svg viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                      <span>No categories available. Please contact your administrator.</span>
+                    </div>
+                  ) : (
+                    categories.map(cat => (
+                      <label key={cat.id} className="category-checkbox-item">
+                        <input
+                          type="checkbox"
+                          checked={selectedCategories.includes(cat.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedCategories([...selectedCategories, cat.id]);
+                            } else {
+                              setSelectedCategories(selectedCategories.filter(id => id !== cat.id));
+                            }
+                          }}
+                        />
+                        <label>{cat.name}</label>
+                      </label>
+                    ))
+                  )}
                 </div>
 
                 <div className="upload-actions">
