@@ -49,7 +49,7 @@ export default function Admin() {
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
   
-  // Upload State - NEW
+  // Upload State
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadTitle, setUploadTitle] = useState('');
   const [uploadCategories, setUploadCategories] = useState<string[]>([]);
@@ -75,18 +75,18 @@ export default function Admin() {
     category_ids: [] as string[]
   });
 
-  // Edit Document Modal - RE-ADDED
+  // Edit Document Modal
   const [showEditDocModal, setShowEditDocModal] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
   const [docCategoryIds, setDocCategoryIds] = useState<string[]>([]);
 
-  // Edit User Modal - NEW
+  // Edit User Modal
   const [showEditUserModal, setShowEditUserModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [editUserCategories, setEditUserCategories] = useState<string[]>([]);
   const [editUserRole, setEditUserRole] = useState<string>('medewerker');
 
-  // Edit Category Modal - NEW
+  // Edit Category Modal
   const [showEditCategoryModal, setShowEditCategoryModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [editCategoryName, setEditCategoryName] = useState('');
@@ -105,9 +105,23 @@ export default function Admin() {
     console.log(`[AUDIT] ${action}: ${details}`);
   };
 
+  // Helper function to check auth and handle 401
+  const checkAuth = (response: Response) => {
+    if (response.status === 401 || response.status === 403) {
+      console.log('Unauthorized - redirecting to login');
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      navigate('/login');
+      return false;
+    }
+    return true;
+  };
+
   useEffect(() => {
     const userStr = localStorage.getItem('user');
-    if (!userStr) {
+    const token = localStorage.getItem('token');
+    
+    if (!userStr || !token) {
       navigate('/login');
       return;
     }
@@ -130,47 +144,68 @@ export default function Admin() {
     setLoading(true);
     const token = localStorage.getItem('token');
     
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+    
     try {
+      // Fetch Documents
       const docsRes = await fetch(`${API_URL}/api/documents/`, {
-        method: 'GET',
-        mode: 'cors',
-        credentials: 'include',
         headers: { 
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
       });
-      const docsData = await docsRes.json();
-      setDocuments(docsData);
+      
+      if (!checkAuth(docsRes)) return;
+      
+      if (docsRes.ok) {
+        const docsData = await docsRes.json();
+        setDocuments(docsData);
+      } else {
+        console.error('Failed to fetch documents:', await docsRes.text());
+      }
 
+      // Fetch Users
       const usersRes = await fetch(`${API_URL}/api/users/`, {
-        method: 'GET',
-        mode: 'cors',
-        credentials: 'include',
         headers: { 
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
       });
-      const usersData = await usersRes.json();
-      setUsers(usersData);
+      
+      if (!checkAuth(usersRes)) return;
+      
+      if (usersRes.ok) {
+        const usersData = await usersRes.json();
+        setUsers(usersData);
+      } else {
+        console.error('Failed to fetch users:', await usersRes.text());
+      }
 
+      // Fetch Categories
       const catsRes = await fetch(`${API_URL}/api/categories/`, {
-        method: 'GET',
-        mode: 'cors',
-        credentials: 'include',
         headers: { 
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
       });
-      const catsData = await catsRes.json();
-      setCategories(catsData);
+      
+      if (!checkAuth(catsRes)) return;
+      
+      if (catsRes.ok) {
+        const catsData = await catsRes.json();
+        setCategories(catsData);
+      } else {
+        console.error('Failed to fetch categories:', await catsRes.text());
+      }
       
       addAuditLog('DATA_FETCH', 'Loaded all admin data');
     } catch (error) {
       console.error('Error fetching data:', error);
       addAuditLog('ERROR', `Failed to fetch data: ${error}`);
+      alert('Failed to load data. Please check your connection and try again.');
     } finally {
       setLoading(false);
     }
@@ -182,7 +217,6 @@ export default function Admin() {
     navigate('/login');
   };
 
-  // NEW: Handle File Upload
   const handleFileUpload = async () => {
     if (!selectedFile || !uploadTitle.trim()) {
       alert('Please select a file and enter a title');
@@ -197,6 +231,12 @@ export default function Admin() {
     setIsUploading(true);
     setUploadSuccess(false);
     const token = localStorage.getItem('token');
+    
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+    
     const formData = new FormData();
     formData.append('file', selectedFile);
     formData.append('title', uploadTitle);
@@ -206,10 +246,12 @@ export default function Admin() {
       const response = await fetch(`${API_URL}/api/documents/upload`, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${token}`,
+          'Authorization': `Bearer ${token}`,
         },
         body: formData,
       });
+
+      if (!checkAuth(response)) return;
 
       if (response.ok) {
         setUploadSuccess(true);
@@ -224,7 +266,7 @@ export default function Admin() {
         }, 1500);
       } else {
         const error = await response.json();
-        alert(`Upload failed: ${error.detail}`);
+        alert(`Upload failed: ${error.detail || 'Unknown error'}`);
         addAuditLog('ERROR', `Failed to upload document: ${error.detail}`);
       }
     } catch (error) {
@@ -238,20 +280,31 @@ export default function Admin() {
 
   const handleDeleteDocument = async (docId: string) => {
     const token = localStorage.getItem('token');
+    
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+    
     try {
-      await fetch(`${API_URL}/api/documents/${docId}`, {
+      const response = await fetch(`${API_URL}/api/documents/${docId}`, {
         method: 'DELETE',
-        mode: 'cors',
-        credentials: 'include',
         headers: { 
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
       });
-      setDocuments(documents.filter(d => d.id !== docId));
-      setShowDeleteModal(false);
-      setDeleteTarget(null);
-      addAuditLog('DELETE_DOCUMENT', `Deleted document: ${deleteTarget?.title}`);
+      
+      if (!checkAuth(response)) return;
+      
+      if (response.ok) {
+        setDocuments(documents.filter(d => d.id !== docId));
+        setShowDeleteModal(false);
+        setDeleteTarget(null);
+        addAuditLog('DELETE_DOCUMENT', `Deleted document: ${deleteTarget?.title}`);
+      } else {
+        alert('Failed to delete document');
+      }
     } catch (error) {
       console.error('Error deleting document:', error);
       alert('Failed to delete document');
@@ -260,20 +313,31 @@ export default function Admin() {
 
   const handleDeleteUser = async (userId: string) => {
     const token = localStorage.getItem('token');
+    
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+    
     try {
-      await fetch(`${API_URL}/api/users/${userId}`, {
+      const response = await fetch(`${API_URL}/api/users/${userId}`, {
         method: 'DELETE',
-        mode: 'cors',
-        credentials: 'include',
         headers: { 
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
       });
-      setUsers(users.filter(u => u.id !== userId));
-      setShowDeleteModal(false);
-      setDeleteTarget(null);
-      addAuditLog('DELETE_USER', `Deleted user: ${deleteTarget?.email}`);
+      
+      if (!checkAuth(response)) return;
+      
+      if (response.ok) {
+        setUsers(users.filter(u => u.id !== userId));
+        setShowDeleteModal(false);
+        setDeleteTarget(null);
+        addAuditLog('DELETE_USER', `Deleted user: ${deleteTarget?.email}`);
+      } else {
+        alert('Failed to delete user');
+      }
     } catch (error) {
       console.error('Error deleting user:', error);
       alert('Failed to delete user');
@@ -282,20 +346,31 @@ export default function Admin() {
 
   const handleDeleteCategory = async (categoryId: string) => {
     const token = localStorage.getItem('token');
+    
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+    
     try {
-      await fetch(`${API_URL}/api/categories/${categoryId}`, {
+      const response = await fetch(`${API_URL}/api/categories/${categoryId}`, {
         method: 'DELETE',
-        mode: 'cors',
-        credentials: 'include',
         headers: { 
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
       });
-      setCategories(categories.filter(c => c.id !== categoryId));
-      setShowDeleteModal(false);
-      setDeleteTarget(null);
-      addAuditLog('DELETE_CATEGORY', `Deleted category: ${deleteTarget?.name}`);
+      
+      if (!checkAuth(response)) return;
+      
+      if (response.ok) {
+        setCategories(categories.filter(c => c.id !== categoryId));
+        setShowDeleteModal(false);
+        setDeleteTarget(null);
+        addAuditLog('DELETE_CATEGORY', `Deleted category: ${deleteTarget?.name}`);
+      } else {
+        alert('Failed to delete category');
+      }
     } catch (error) {
       console.error('Error deleting category:', error);
       alert('Failed to delete category');
@@ -315,17 +390,23 @@ export default function Admin() {
     }
     
     const token = localStorage.getItem('token');
+    
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+    
     try {
       const response = await fetch(`${API_URL}/auth/register`, {
         method: 'POST',
-        mode: 'cors',
-        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(newUser),
       });
+      
+      if (!checkAuth(response)) return;
       
       if (!response.ok) {
         const data = await response.json();
@@ -349,22 +430,33 @@ export default function Admin() {
     if (!newCategory.name.trim()) return;
     
     const token = localStorage.getItem('token');
+    
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+    
     try {
       const response = await fetch(`${API_URL}/api/categories/`, {
         method: 'POST',
-        mode: 'cors',
-        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(newCategory),
       });
-      const data = await response.json();
-      setCategories([...categories, data]);
-      setNewCategory({ name: '', description: '' });
-      setShowCategoryModal(false);
-      addAuditLog('CREATE_CATEGORY', `Created category: ${newCategory.name}`);
+      
+      if (!checkAuth(response)) return;
+      
+      if (response.ok) {
+        const data = await response.json();
+        setCategories([...categories, data]);
+        setNewCategory({ name: '', description: '' });
+        setShowCategoryModal(false);
+        addAuditLog('CREATE_CATEGORY', `Created category: ${newCategory.name}`);
+      } else {
+        alert('Failed to create category');
+      }
     } catch (error) {
       console.error('Error creating category:', error);
       alert('Failed to create category');
@@ -376,17 +468,22 @@ export default function Admin() {
     
     const token = localStorage.getItem('token');
     
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+    
     try {
       const response = await fetch(`${API_URL}/api/documents/${selectedDoc.id}`, {
         method: 'PUT',
-        mode: 'cors',
-        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ category_ids: docCategoryIds }),
       });
+      
+      if (!checkAuth(response)) return;
       
       if (!response.ok) {
         const errorData = await response.json();
@@ -409,11 +506,14 @@ export default function Admin() {
     
     const token = localStorage.getItem('token');
     
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+    
     try {
       const response = await fetch(`${API_URL}/api/users/${selectedUser.id}`, {
         method: 'PUT',
-        mode: 'cors',
-        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
@@ -423,6 +523,8 @@ export default function Admin() {
           category_ids: editUserCategories 
         }),
       });
+      
+      if (!checkAuth(response)) return;
       
       if (!response.ok) {
         const errorData = await response.json();
@@ -445,11 +547,14 @@ export default function Admin() {
     
     const token = localStorage.getItem('token');
     
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+    
     try {
       const response = await fetch(`${API_URL}/api/categories/${selectedCategory.id}`, {
         method: 'PUT',
-        mode: 'cors',
-        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
@@ -459,6 +564,8 @@ export default function Admin() {
           description: editCategoryDescription 
         }),
       });
+      
+      if (!checkAuth(response)) return;
       
       if (!response.ok) {
         const errorData = await response.json();
@@ -977,7 +1084,7 @@ export default function Admin() {
         </div>
       )}
 
-      {/* Upload Document Modal - NEW */}
+      {/* Upload Document Modal */}
       {showUploadModal && (
         <div className="modal-overlay" onClick={() => setShowUploadModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '700px' }}>
@@ -1103,7 +1210,7 @@ export default function Admin() {
         </div>
       )}
 
-      {/* Edit Document Modal - RE-ADDED */}
+      {/* Edit Document Modal */}
       {showEditDocModal && selectedDoc && (
         <div className="modal-overlay" onClick={() => setShowEditDocModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -1118,9 +1225,9 @@ export default function Admin() {
             <div className="modal-body">
               <div className="form-group">
                 <label className="form-label">Document</label>
-                <div style={{ padding: '0.75rem', background: '#0f172a', borderRadius: '0.5rem', border: '1px solid #334155' }}>
+                <div style={{ padding: '0.75rem', background: '#f8fafc', borderRadius: '0.5rem', border: '1px solid #e2e8f0' }}>
                   <div style={{ fontWeight: 600, marginBottom: '0.25rem' }}>{selectedDoc.title}</div>
-                  <div style={{ fontSize: '0.875rem', color: '#94a3b8' }}>{selectedDoc.file_name}</div>
+                  <div style={{ fontSize: '0.875rem', color: '#64748b' }}>{selectedDoc.file_name}</div>
                 </div>
               </div>
 
@@ -1168,7 +1275,7 @@ export default function Admin() {
         </div>
       )}
 
-      {/* Edit User Modal - NEW */}
+      {/* Edit User Modal */}
       {showEditUserModal && selectedUser && (
         <div className="modal-overlay" onClick={() => setShowEditUserModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -1183,9 +1290,9 @@ export default function Admin() {
             <div className="modal-body">
               <div className="form-group">
                 <label className="form-label">User</label>
-                <div style={{ padding: '0.75rem', background: '#0f172a', borderRadius: '0.5rem', border: '1px solid #334155' }}>
+                <div style={{ padding: '0.75rem', background: '#f8fafc', borderRadius: '0.5rem', border: '1px solid #e2e8f0' }}>
                   <div style={{ fontWeight: 600, marginBottom: '0.25rem' }}>{selectedUser.full_name}</div>
-                  <div style={{ fontSize: '0.875rem', color: '#94a3b8' }}>{selectedUser.email}</div>
+                  <div style={{ fontSize: '0.875rem', color: '#64748b' }}>{selectedUser.email}</div>
                 </div>
               </div>
 
@@ -1246,7 +1353,7 @@ export default function Admin() {
         </div>
       )}
 
-      {/* Edit Category Modal - NEW */}
+      {/* Edit Category Modal */}
       {showEditCategoryModal && selectedCategory && (
         <div className="modal-overlay" onClick={() => setShowEditCategoryModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
