@@ -1101,3 +1101,9 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Download Button Styling */
+.btn-icon.btn-download:hover {
+  background: #dcfce7;
+  color: #15803d;
+}
