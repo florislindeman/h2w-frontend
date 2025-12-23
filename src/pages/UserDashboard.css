@@ -822,6 +822,11 @@
   color: #1e40af;
 }
 
+.btn-icon.btn-download:hover {
+  background: #dcfce7;
+  color: #15803d;
+}
+
 .btn-icon.btn-delete:hover {
   background: #fee2e2;
   color: #dc2626;
