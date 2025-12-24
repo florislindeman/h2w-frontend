@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './UserDashboard.css';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://h2wchatbot-production.up.railway.app';
+// Production API URL - hardcoded to ensure HTTPS is always used
+const API_URL = 'https://h2wchatbot-production.up.railway.app';
 
 interface Message {
   role: 'user' | 'assistant';
