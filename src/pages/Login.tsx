@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://h2wchatbot-production.up.railway.app';
+const API_URL = 'https://h2wchatbot-production.up.railway.app';
 
 export default function Login() {
   const navigate = useNavigate();
