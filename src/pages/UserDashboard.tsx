@@ -6,6 +6,8 @@ import './UserDashboard.css';
 const API_URL = 'https://h2wchatbot-production.up.railway.app';
 // Force redeploy - Dec 27 2025
 // Force rebuild v3 - Dec 27 2025
+export const BUILD_ID = 'v4-dec27-2025-final';
+
 interface Message {
   role: 'user' | 'assistant';
   content: string;
