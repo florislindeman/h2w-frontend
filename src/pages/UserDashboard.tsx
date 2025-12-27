@@ -4,7 +4,7 @@ import './UserDashboard.css';
 
 // Production API URL - hardcoded to ensure HTTPS is always used
 const API_URL = 'https://h2wchatbot-production.up.railway.app';
-
+// Force redeploy - Dec 27 2025
 interface Message {
   role: 'user' | 'assistant';
   content: string;
