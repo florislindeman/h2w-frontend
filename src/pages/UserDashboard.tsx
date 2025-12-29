@@ -3,10 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import './UserDashboard.css';
 
 // Production API URL - hardcoded to ensure HTTPS is always used
-const API_URL = 'https://h2wchatbot-production.up.railway.app';
-// Force redeploy - Dec 27 2025
+const API_URL = 'https://h2wchatbot-production.up.railway.app'; // v6 - force new hash// Force redeploy - Dec 27 2025
 // Force rebuild v3 - Dec 27 2025
-export const BUILD_ID = 'v4-dec27-2025-final';
+
 
 interface Message {
   role: 'user' | 'assistant';
