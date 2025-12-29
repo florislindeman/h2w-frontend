@@ -36,4 +36,13 @@ export const chatAPI = {
     api.post('/chat/ask', { question, document_ids }),
 };
 
+// ADD THIS - Categories API
+export const categoriesAPI = {
+  list: () => api.get('/categories/'),
+  create: (name: string, description?: string) =>
+    api.post('/categories/', { name, description }),
+  delete: (categoryId: string) =>
+    api.delete(`/categories/${categoryId}`),
+};
+
 export default api;
