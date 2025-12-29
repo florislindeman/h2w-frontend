@@ -87,7 +87,7 @@ export default function UserDashboard() {
 
   const fetchCategories = async () => {
     const token = localStorage.getItem('token');
-    console.log('[CATEGORIES] Fetching categories...');
+    console.log('[CATEGORIES] Fetching categories... [v4]');
     try {
       const response = await fetch(`${API_URL}/api/categories`, {
         headers: { 'Authorization': `Bearer ${token}` }
