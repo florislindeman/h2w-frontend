@@ -151,7 +151,7 @@ export default function Admin() {
     
     try {
       // Fetch Documents
-      const docsRes = await fetch(`${API_URL}/api/documents/`, {
+      const docsRes = await fetch(`${API_URL}/documents/`, {
         headers: { 
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -168,7 +168,7 @@ export default function Admin() {
       }
 
       // Fetch Users
-      const usersRes = await fetch(`${API_URL}/api/users/`, {
+      const usersRes = await fetch(`${API_URL}/users/`, {
         headers: { 
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -185,7 +185,7 @@ export default function Admin() {
       }
 
       // Fetch Categories
-      const catsRes = await fetch(`${API_URL}/api/categories/`, {
+      const catsRes = await fetch(`${API_URL}/categories/`, {
         headers: { 
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -243,7 +243,7 @@ export default function Admin() {
     formData.append('category_ids', JSON.stringify(uploadCategories));
 
     try {
-      const response = await fetch(`${API_URL}/api/documents/upload`, {
+      const response = await fetch(`${API_URL}/documents/upload`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -281,7 +281,7 @@ export default function Admin() {
   const handleDownloadDocument = async (doc: Document) => {
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`${API_URL}/api/documents/${doc.id}/download`, {
+      const response = await fetch(`${API_URL}/documents/${doc.id}/download`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -333,7 +333,7 @@ export default function Admin() {
     }
     
     try {
-      const response = await fetch(`${API_URL}/api/documents/${docId}`, {
+      const response = await fetch(`${API_URL}/documents/${docId}`, {
         method: 'DELETE',
         headers: { 
           'Authorization': `Bearer ${token}`,
@@ -366,7 +366,7 @@ export default function Admin() {
     }
     
     try {
-      const response = await fetch(`${API_URL}/api/users/${userId}`, {
+      const response = await fetch(`${API_URL}/users/${userId}`, {
         method: 'DELETE',
         headers: { 
           'Authorization': `Bearer ${token}`,
@@ -399,7 +399,7 @@ export default function Admin() {
     }
     
     try {
-      const response = await fetch(`${API_URL}/api/categories/${categoryId}`, {
+      const response = await fetch(`${API_URL}/categories/${categoryId}`, {
         method: 'DELETE',
         headers: { 
           'Authorization': `Bearer ${token}`,
@@ -483,7 +483,7 @@ export default function Admin() {
     }
     
     try {
-      const response = await fetch(`${API_URL}/api/categories/`, {
+      const response = await fetch(`${API_URL}/categories/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -520,7 +520,7 @@ export default function Admin() {
     }
     
     try {
-      const response = await fetch(`${API_URL}/api/documents/${selectedDoc.id}`, {
+      const response = await fetch(`${API_URL}/documents/${selectedDoc.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -558,7 +558,7 @@ export default function Admin() {
     }
     
     try {
-      const response = await fetch(`${API_URL}/api/users/${selectedUser.id}`, {
+      const response = await fetch(`${API_URL}/users/${selectedUser.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -599,7 +599,7 @@ export default function Admin() {
     }
     
     try {
-      const response = await fetch(`${API_URL}/api/categories/${selectedCategory.id}`, {
+      const response = await fetch(`${API_URL}/categories/${selectedCategory.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
