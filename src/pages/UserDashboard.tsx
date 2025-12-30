@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import './UserDashboard.css';
 
 // Production API URL - hardcoded to ensure HTTPS is always used
-const API_URL = 'https://h2wchatbot-production.up.railway.app';
+const API_URL = import.meta.env.VITE_API_URL || 'https://h2wchatbot-production.up.railway.app';
 console.log('[API] Using endpoint:', API_URL); // Force bundle change v7
 
 interface Message {
