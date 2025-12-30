@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './UserDashboard.css';
 
-// Production API URL - hardcoded to ensure HTTPS is always used
+// Production API URL - uses environment variable from Vercel
 const API_URL = import.meta.env.VITE_API_URL || 'https://h2wchatbot-production.up.railway.app';
-console.log('[API] Using endpoint:', API_URL); // Force bundle change v7
+console.log('[API] Using endpoint:', API_URL); // Debug log
 
 interface Message {
   role: 'user' | 'assistant';
@@ -85,9 +85,9 @@ export default function UserDashboard() {
 
   const fetchCategories = async () => {
     const token = localStorage.getItem('token');
-    console.log('[CATEGORIES] Fetching categories... [v4]');
+    console.log('[CATEGORIES] Fetching categories from:', `${API_URL}/api/categories/`);
     try {
-      const response = await fetch(`${API_URL}/categories/`, {
+      const response = await fetch(`${API_URL}/api/categories/`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
@@ -123,7 +123,7 @@ export default function UserDashboard() {
     setIsLoadingDocs(true);
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`${API_URL}/documents/my-documents`, {
+      const response = await fetch(`${API_URL}/api/documents/my-documents`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (response.ok) {
@@ -148,7 +148,7 @@ export default function UserDashboard() {
 
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`${API_URL}/chat`, {
+      const response = await fetch(`${API_URL}/api/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -191,7 +191,7 @@ export default function UserDashboard() {
     formData.append('category_ids', JSON.stringify(selectedCategories));
 
     try {
-      const response = await fetch(`${API_URL}/documents/upload`, {
+      const response = await fetch(`${API_URL}/api/documents/upload`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         body: formData
@@ -230,7 +230,7 @@ export default function UserDashboard() {
     const payload = { title: editTitle, category_ids: editCategories };
 
     try {
-      const response = await fetch(`${API_URL}/documents/${selectedDocument.id}`, {
+      const response = await fetch(`${API_URL}/api/documents/${selectedDocument.id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -260,7 +260,7 @@ export default function UserDashboard() {
 
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`${API_URL}/documents/${deleteDocument.id}`, {
+      const response = await fetch(`${API_URL}/api/documents/${deleteDocument.id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -279,7 +279,7 @@ export default function UserDashboard() {
   const handleDownloadDocument = async (doc: Document) => {
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`${API_URL}/documents/${doc.id}/download`, {
+      const response = await fetch(`${API_URL}/api/documents/${doc.id}/download`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
