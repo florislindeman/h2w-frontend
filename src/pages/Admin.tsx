@@ -86,9 +86,8 @@ export default function Admin() {
   const [editCategoryName, setEditCategoryName] = useState('');
   const [editCategoryDescription, setEditCategoryDescription] = useState('');
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
-  
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+
   const addAuditLog = (action: string, details: string) => {
     const log: AuditLog = { action, details, timestamp: new Date() };
     setAuditLogs(prev => [log, ...prev].slice(0, 50));
@@ -614,6 +613,21 @@ const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
             )}
           </>
         )}
+        <div className="audit-log-section">
+          <h3 className="audit-log-title">Recent Activity</h3>
+          <div className="audit-log-list">
+            {auditLogs.slice(0, 5).map((log, index) => (
+              <div key={index} className="audit-log-item">
+                <span className="audit-action">{log.action}</span>
+                <span className="audit-details">{log.details}</span>
+                <span className="audit-time">{log.timestamp.toLocaleTimeString()}</span>
+              </div>
+            ))}
+            {auditLogs.length === 0 && (
+              <div className="audit-log-empty">No recent activity</div>
+            )}
+          </div>
+        </div>
       </main>
       <nav className="bottom-nav">
         <div className="bottom-nav-content">
