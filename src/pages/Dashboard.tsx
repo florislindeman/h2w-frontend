@@ -165,7 +165,7 @@ export default function Dashboard() {
                     type="text"
                     value={question}
                     onChange={(e) => setQuestion(e.target.value)}
-                    placeholder="Type your question..."
+                    placeholder="Ask me anything about the documents..."
                     className="chat-input"
                     disabled={loading}
                   />
