@@ -996,7 +996,54 @@ export default function Admin() {
             )}
           </div>
         </div>
-      </main>
+            </main>
+
+      {/* Bottom Navigation - Mobile Only */}
+      <nav className="bottom-nav">
+        <div className="bottom-nav-content">
+          <button
+            onClick={() => setActiveTab('documents')}
+            className={`bottom-nav-item ${activeTab === 'documents' ? 'active' : ''}`}
+          >
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
+            </svg>
+            <span>Docs</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('users')}
+            className={`bottom-nav-item ${activeTab === 'users' ? 'active' : ''}`}
+          >
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+            </svg>
+            <span>Users</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('categories')}
+            className={`bottom-nav-item ${activeTab === 'categories' ? 'active' : ''}`}
+          >
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
+            </svg>
+            <span>Cats</span>
+          </button>
+
+          <button
+            onClick={handleLogout}
+            className="bottom-nav-item"
+          >
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clipRule="evenodd" />
+            </svg>
+            <span>Exit</span>
+          </button>
+        </div>
+      </nav>
+
+      {/* Delete Modal */}
 
       {/* ... ALL MODALS REMAIN THE SAME - Truncated for space but they're in the full file ... */}
     </div>
