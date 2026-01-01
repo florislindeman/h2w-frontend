@@ -45,18 +45,15 @@ export default function Admin() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   
-  // Search & Filter
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
   
-  // Upload State
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadTitle, setUploadTitle] = useState('');
   const [uploadCategories, setUploadCategories] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   
-  // Modals
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<any>(null);
@@ -75,40 +72,30 @@ export default function Admin() {
     category_ids: [] as string[]
   });
 
-  // Edit Document Modal
   const [showEditDocModal, setShowEditDocModal] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
   const [docCategoryIds, setDocCategoryIds] = useState<string[]>([]);
 
-  // Edit User Modal
   const [showEditUserModal, setShowEditUserModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [editUserCategories, setEditUserCategories] = useState<string[]>([]);
   const [editUserRole, setEditUserRole] = useState<string>('medewerker');
 
-  // Edit Category Modal
   const [showEditCategoryModal, setShowEditCategoryModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [editCategoryName, setEditCategoryName] = useState('');
   const [editCategoryDescription, setEditCategoryDescription] = useState('');
 
-  // Audit Logging
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
 
   const addAuditLog = (action: string, details: string) => {
-    const log: AuditLog = {
-      action,
-      details,
-      timestamp: new Date()
-    };
+    const log: AuditLog = { action, details, timestamp: new Date() };
     setAuditLogs(prev => [log, ...prev].slice(0, 50));
-    console.log(\`[AUDIT] \${action}: \${details}\`);
+    console.log('[AUDIT]', action, ':', details);
   };
 
-  // Helper function to check auth and handle 401
   const checkAuth = (response: Response) => {
     if (response.status === 401 || response.status === 403) {
-      console.log('Unauthorized - redirecting to login');
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       navigate('/login');
@@ -150,43 +137,40 @@ export default function Admin() {
     }
     
     try {
-      const docsRes = await fetch(\`\${API_URL}/api/documents/\`, {
+      const docsRes = await fetch(API_URL + '/api/documents/', {
         headers: { 
-          'Authorization': \`Bearer \${token}\`,
+          'Authorization': 'Bearer ' + token,
           'Content-Type': 'application/json'
         },
       });
       
       if (!checkAuth(docsRes)) return;
-      
       if (docsRes.ok) {
         const docsData = await docsRes.json();
         setDocuments(docsData);
       }
 
-      const usersRes = await fetch(\`\${API_URL}/api/users/\`, {
+      const usersRes = await fetch(API_URL + '/api/users/', {
         headers: { 
-          'Authorization': \`Bearer \${token}\`,
+          'Authorization': 'Bearer ' + token,
           'Content-Type': 'application/json'
         },
       });
       
       if (!checkAuth(usersRes)) return;
-      
       if (usersRes.ok) {
         const usersData = await usersRes.json();
         setUsers(usersData);
       }
 
-      const catsRes = await fetch(\`\${API_URL}/api/categories/\`, {
+      const catsRes = await fetch(API_URL + '/api/categories/', {
         headers: { 
-          'Authorization': \`Bearer \${token}\`,
+          'Authorization': 'Bearer ' + token,
           'Content-Type': 'application/json'
         },
       });
       
       if (!checkAuth(catsRes)) return;
-      
       if (catsRes.ok) {
         const catsData = await catsRes.json();
         setCategories(catsData);
@@ -208,7 +192,7 @@ export default function Admin() {
 
   const handleFileUpload = async () => {
     if (!selectedFile || !uploadTitle.trim() || uploadCategories.length === 0) {
-      alert('Please select a file, title, and at least one category');
+      alert('Please select file, title, and at least one category');
       return;
     }
 
@@ -222,9 +206,9 @@ export default function Admin() {
     formData.append('category_ids', JSON.stringify(uploadCategories));
 
     try {
-      const response = await fetch(\`\${API_URL}/api/documents/upload\`, {
+      const response = await fetch(API_URL + '/api/documents/upload', {
         method: 'POST',
-        headers: { 'Authorization': \`Bearer \${token}\` },
+        headers: { 'Authorization': 'Bearer ' + token },
         body: formData,
       });
 
@@ -249,8 +233,8 @@ export default function Admin() {
   const handleDownloadDocument = async (doc: Document) => {
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(\`\${API_URL}/api/documents/\${doc.id}/download\`, {
-        headers: { 'Authorization': \`Bearer \${token}\` }
+      const response = await fetch(API_URL + '/api/documents/' + doc.id + '/download', {
+        headers: { 'Authorization': 'Bearer ' + token }
       });
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
@@ -275,9 +259,9 @@ export default function Admin() {
   const handleDeleteDocument = async (docId: string) => {
     const token = localStorage.getItem('token');
     try {
-      await fetch(\`\${API_URL}/api/documents/\${docId}\`, {
+      await fetch(API_URL + '/api/documents/' + docId, {
         method: 'DELETE',
-        headers: { 'Authorization': \`Bearer \${token}\` },
+        headers: { 'Authorization': 'Bearer ' + token },
       });
       setDocuments(documents.filter(d => d.id !== docId));
       setShowDeleteModal(false);
@@ -289,9 +273,9 @@ export default function Admin() {
   const handleDeleteUser = async (userId: string) => {
     const token = localStorage.getItem('token');
     try {
-      await fetch(\`\${API_URL}/api/users/\${userId}\`, {
+      await fetch(API_URL + '/api/users/' + userId, {
         method: 'DELETE',
-        headers: { 'Authorization': \`Bearer \${token}\` },
+        headers: { 'Authorization': 'Bearer ' + token },
       });
       setUsers(users.filter(u => u.id !== userId));
       setShowDeleteModal(false);
@@ -303,9 +287,9 @@ export default function Admin() {
   const handleDeleteCategory = async (categoryId: string) => {
     const token = localStorage.getItem('token');
     try {
-      await fetch(\`\${API_URL}/api/categories/\${categoryId}\`, {
+      await fetch(API_URL + '/api/categories/' + categoryId, {
         method: 'DELETE',
-        headers: { 'Authorization': \`Bearer \${token}\` },
+        headers: { 'Authorization': 'Bearer ' + token },
       });
       setCategories(categories.filter(c => c.id !== categoryId));
       setShowDeleteModal(false);
@@ -318,11 +302,11 @@ export default function Admin() {
     if (!newUser.email || !newUser.password || !newUser.full_name) return;
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(\`\${API_URL}/auth/register\`, {
+      const response = await fetch(API_URL + '/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': \`Bearer \${token}\`,
+          'Authorization': 'Bearer ' + token,
         },
         body: JSON.stringify(newUser),
       });
@@ -339,11 +323,11 @@ export default function Admin() {
     if (!newCategory.name) return;
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(\`\${API_URL}/api/categories/\`, {
+      const response = await fetch(API_URL + '/api/categories/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': \`Bearer \${token}\`,
+          'Authorization': 'Bearer ' + token,
         },
         body: JSON.stringify(newCategory),
       });
@@ -360,11 +344,11 @@ export default function Admin() {
     if (!selectedDoc) return;
     const token = localStorage.getItem('token');
     try {
-      await fetch(\`\${API_URL}/api/documents/\${selectedDoc.id}\`, {
+      await fetch(API_URL + '/api/documents/' + selectedDoc.id, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': \`Bearer \${token}\`,
+          'Authorization': 'Bearer ' + token,
         },
         body: JSON.stringify({ category_ids: docCategoryIds }),
       });
@@ -379,11 +363,11 @@ export default function Admin() {
     if (!selectedUser) return;
     const token = localStorage.getItem('token');
     try {
-      await fetch(\`\${API_URL}/api/users/\${selectedUser.id}\`, {
+      await fetch(API_URL + '/api/users/' + selectedUser.id, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': \`Bearer \${token}\`,
+          'Authorization': 'Bearer ' + token,
         },
         body: JSON.stringify({ role: editUserRole, category_ids: editUserCategories }),
       });
@@ -398,11 +382,11 @@ export default function Admin() {
     if (!selectedCategory) return;
     const token = localStorage.getItem('token');
     try {
-      await fetch(\`\${API_URL}/api/categories/\${selectedCategory.id}\`, {
+      await fetch(API_URL + '/api/categories/' + selectedCategory.id, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': \`Bearer \${token}\`,
+          'Authorization': 'Bearer ' + token,
         },
         body: JSON.stringify({ name: editCategoryName, description: editCategoryDescription }),
       });
@@ -436,21 +420,21 @@ export default function Admin() {
           </div>
         </div>
         <nav className="sidebar-nav">
-          <button onClick={() => setActiveTab('documents')} className={`nav-item ${activeTab === 'documents' ? 'active' : ''}`}>
+          <button onClick={() => setActiveTab('documents')} className={'nav-item ' + (activeTab === 'documents' ? 'active' : '')}>
             <svg viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
             </svg>
             <span>Documents</span>
             <span className="badge">{documents.length}</span>
           </button>
-          <button onClick={() => setActiveTab('users')} className={`nav-item ${activeTab === 'users' ? 'active' : ''}`}>
+          <button onClick={() => setActiveTab('users')} className={'nav-item ' + (activeTab === 'users' ? 'active' : '')}>
             <svg viewBox="0 0 20 20" fill="currentColor">
               <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
             </svg>
             <span>Users</span>
             <span className="badge">{users.length}</span>
           </button>
-          <button onClick={() => setActiveTab('categories')} className={`nav-item ${activeTab === 'categories' ? 'active' : ''}`}>
+          <button onClick={() => setActiveTab('categories')} className={'nav-item ' + (activeTab === 'categories' ? 'active' : '')}>
             <svg viewBox="0 0 20 20" fill="currentColor">
               <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
             </svg>
@@ -507,6 +491,7 @@ export default function Admin() {
             </button>
           )}
         </header>
+
         {loading ? (
           <div className="loading-container">
             <div className="spinner"></div>
@@ -518,13 +503,7 @@ export default function Admin() {
               <div className="admin-table-container">
                 <table className="admin-table">
                   <thead>
-                    <tr>
-                      <th>DOCUMENT</th>
-                      <th>TYPE</th>
-                      <th>UPLOAD DATE</th>
-                      <th>CATEGORIES</th>
-                      <th>ACTIONS</th>
-                    </tr>
+                    <tr><th>DOCUMENT</th><th>TYPE</th><th>UPLOAD DATE</th><th>CATEGORIES</th><th>ACTIONS</th></tr>
                   </thead>
                   <tbody>
                     {documents.map((doc) => (
@@ -542,9 +521,7 @@ export default function Admin() {
                         <td>{new Date(doc.upload_date).toLocaleDateString()}</td>
                         <td>
                           <div className="category-pills">
-                            {doc.categories?.map((cat) => (
-                              <span key={cat.id} className="category-pill">{cat.name}</span>
-                            )) || <span className="text-muted">No categories</span>}
+                            {doc.categories?.map((cat) => (<span key={cat.id} className="category-pill">{cat.name}</span>)) || <span className="text-muted">No categories</span>}
                           </div>
                         </td>
                         <td>
@@ -584,9 +561,7 @@ export default function Admin() {
                 </div>
                 <div className="admin-table-container">
                   <table className="admin-table">
-                    <thead>
-                      <tr><th>USER</th><th>EMAIL</th><th>ROLE</th><th>CATEGORIES</th><th>ACTIONS</th></tr>
-                    </thead>
+                    <thead><tr><th>USER</th><th>EMAIL</th><th>ROLE</th><th>CATEGORIES</th><th>ACTIONS</th></tr></thead>
                     <tbody>
                       {filteredUsers.map((user) => (
                         <tr key={user.id}>
@@ -639,18 +614,17 @@ export default function Admin() {
           </>
         )}
       </main>
-
       <nav className="bottom-nav">
         <div className="bottom-nav-content">
-          <button onClick={() => setActiveTab('documents')} className={\`bottom-nav-item \${activeTab === 'documents' ? 'active' : ''}\`}>
+          <button onClick={() => setActiveTab('documents')} className={'bottom-nav-item ' + (activeTab === 'documents' ? 'active' : '')}>
             <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" /></svg>
             <span>Docs</span>
           </button>
-          <button onClick={() => setActiveTab('users')} className={\`bottom-nav-item \${activeTab === 'users' ? 'active' : ''}\`}>
+          <button onClick={() => setActiveTab('users')} className={'bottom-nav-item ' + (activeTab === 'users' ? 'active' : '')}>
             <svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" /></svg>
             <span>Users</span>
           </button>
-          <button onClick={() => setActiveTab('categories')} className={\`bottom-nav-item \${activeTab === 'categories' ? 'active' : ''}\`}>
+          <button onClick={() => setActiveTab('categories')} className={'bottom-nav-item ' + (activeTab === 'categories' ? 'active' : '')}>
             <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" /></svg>
             <span>Cats</span>
           </button>
@@ -671,13 +645,30 @@ export default function Admin() {
               </button>
             </div>
             <div className="modal-body">
-              {uploadSuccess && <div className="success-banner"><svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>Document uploaded successfully!</div>}
+              {uploadSuccess && (
+                <div className="success-banner">
+                  <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+                  Document uploaded successfully!
+                </div>
+              )}
               <div className="file-drop-zone">
                 <label htmlFor="file-upload" className="file-drop-label">
                   {selectedFile ? (
-                    <div className="selected-file"><svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg><div className="file-info"><p>{selectedFile.name}</p><span>{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</span></div></div>
+                    <div className="selected-file">
+                      <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+                      <div className="file-info">
+                        <p>{selectedFile.name}</p>
+                        <span>{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</span>
+                      </div>
+                    </div>
                   ) : (
-                    <><svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd" /></svg><div className="file-info"><p>Click to upload or drag and drop</p><span>PDF, DOCX, XLSX (max. 50MB)</span></div></>
+                    <>
+                      <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd" /></svg>
+                      <div className="file-info">
+                        <p>Click to upload or drag and drop</p>
+                        <span>PDF, DOCX, XLSX (max. 50MB)</span>
+                      </div>
+                    </>
                   )}
                 </label>
                 <input id="file-upload" type="file" onChange={(e) => setSelectedFile(e.target.files?.[0] || null)} className="file-input" />
@@ -690,9 +681,7 @@ export default function Admin() {
                 <label className="form-label">Categories (Select at least one)</label>
                 {categories.map(cat => (
                   <label key={cat.id} className="category-checkbox-item">
-                    <input type="checkbox" checked={uploadCategories.includes(cat.id)} onChange={(e) => {
-                      if (e.target.checked) { setUploadCategories([...uploadCategories, cat.id]); } else { setUploadCategories(uploadCategories.filter(id => id !== cat.id)); }
-                    }} />
+                    <input type="checkbox" checked={uploadCategories.includes(cat.id)} onChange={(e) => { if (e.target.checked) { setUploadCategories([...uploadCategories, cat.id]); } else { setUploadCategories(uploadCategories.filter(id => id !== cat.id)); } }} />
                     <label>{cat.name}</label>
                   </label>
                 ))}
@@ -717,9 +706,11 @@ export default function Admin() {
             </div>
             <div className="modal-body">
               <div className="delete-modal-content">
-                <div className="delete-icon"><svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" /></svg></div>
+                <div className="delete-icon">
+                  <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
+                </div>
                 <h3>Are you sure?</h3>
-                <p>This action cannot be undone. This will permanently delete the {deleteType}{deleteType === 'document' && \` "\${deleteTarget?.title}"\`}{deleteType === 'user' && \` "\${deleteTarget?.full_name}"\`}{deleteType === 'category' && \` "\${deleteTarget?.name}"\`}.</p>
+                <p>This action cannot be undone. This will permanently delete the {deleteType}{deleteType === 'document' && ' "' + (deleteTarget?.title || '') + '"'}{deleteType === 'user' && ' "' + (deleteTarget?.full_name || '') + '"'}{deleteType === 'category' && ' "' + (deleteTarget?.name || '') + '"'}.</p>
               </div>
             </div>
             <div className="modal-actions">
@@ -745,9 +736,7 @@ export default function Admin() {
                 <label className="form-label">Categories</label>
                 {categories.map(cat => (
                   <label key={cat.id} className="checkbox-label">
-                    <input type="checkbox" checked={docCategoryIds.includes(cat.id)} onChange={(e) => {
-                      if (e.target.checked) { setDocCategoryIds([...docCategoryIds, cat.id]); } else { setDocCategoryIds(docCategoryIds.filter(id => id !== cat.id)); }
-                    }} />
+                    <input type="checkbox" checked={docCategoryIds.includes(cat.id)} onChange={(e) => { if (e.target.checked) { setDocCategoryIds([...docCategoryIds, cat.id]); } else { setDocCategoryIds(docCategoryIds.filter(id => id !== cat.id)); } }} />
                     <span>{cat.name}</span>
                   </label>
                 ))}
@@ -784,9 +773,7 @@ export default function Admin() {
                 <label className="form-label">Categories</label>
                 {categories.map(cat => (
                   <label key={cat.id} className="checkbox-label">
-                    <input type="checkbox" checked={editUserCategories.includes(cat.id)} onChange={(e) => {
-                      if (e.target.checked) { setEditUserCategories([...editUserCategories, cat.id]); } else { setEditUserCategories(editUserCategories.filter(id => id !== cat.id)); }
-                    }} />
+                    <input type="checkbox" checked={editUserCategories.includes(cat.id)} onChange={(e) => { if (e.target.checked) { setEditUserCategories([...editUserCategories, cat.id]); } else { setEditUserCategories(editUserCategories.filter(id => id !== cat.id)); } }} />
                     <span>{cat.name}</span>
                   </label>
                 ))}
@@ -834,9 +821,7 @@ export default function Admin() {
                 <label className="form-label">Categories</label>
                 {categories.map(cat => (
                   <label key={cat.id} className="checkbox-label">
-                    <input type="checkbox" checked={newUser.category_ids.includes(cat.id)} onChange={(e) => {
-                      if (e.target.checked) { setNewUser({...newUser, category_ids: [...newUser.category_ids, cat.id]}); } else { setNewUser({...newUser, category_ids: newUser.category_ids.filter(id => id !== cat.id)}); }
-                    }} />
+                    <input type="checkbox" checked={newUser.category_ids.includes(cat.id)} onChange={(e) => { if (e.target.checked) { setNewUser({...newUser, category_ids: [...newUser.category_ids, cat.id]}); } else { setNewUser({...newUser, category_ids: newUser.category_ids.filter(id => id !== cat.id)}); } }} />
                     <span>{cat.name}</span>
                   </label>
                 ))}
