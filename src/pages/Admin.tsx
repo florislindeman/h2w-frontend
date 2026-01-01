@@ -86,8 +86,9 @@ export default function Admin() {
   const [editCategoryName, setEditCategoryName] = useState('');
   const [editCategoryDescription, setEditCategoryDescription] = useState('');
 
-  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+  
   const addAuditLog = (action: string, details: string) => {
     const log: AuditLog = { action, details, timestamp: new Date() };
     setAuditLogs(prev => [log, ...prev].slice(0, 50));
