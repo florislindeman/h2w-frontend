@@ -110,7 +110,7 @@ export default function Dashboard() {
       <aside className="sidebar">
         <div className="sidebar-header">
           <div className="sidebar-logo">
-            <img src="/images/new-concept-group-logo.jpeg" alt="New Concept Group" style={{ maxWidth: '100%', height: 'auto' }} />
+            <img src="/images/new-concept-group-logo.jpeg" alt="New Concept Group" />
           </div>
         </div>
 
