@@ -116,24 +116,18 @@ export default function Dashboard() {
 
         <nav className="sidebar-nav">
           <button onClick={() => setActiveView('chat')} className={'nav-item ' + (activeView === 'chat' ? 'active' : '')}>
-            <svg viewBox="0 0 20 20" style={{ width: '20px', height: '20px' }}>
-              <path fill="currentColor" fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
-            </svg>
+            <span className="nav-icon">💬</span>
             <span>Ask Questions</span>
           </button>
           <button onClick={() => setActiveView('documents')} className={'nav-item ' + (activeView === 'documents' ? 'active' : '')}>
-            <svg viewBox="0 0 20 20" style={{ width: '20px', height: '20px' }}>
-              <path fill="currentColor" fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
-            </svg>
+            <span className="nav-icon">📄</span>
             <span>Documents</span>
           </button>
         </nav>
 
         <div className="sidebar-footer">
           <button onClick={handleLogout} className="logout-btn">
-            <svg viewBox="0 0 20 20" style={{ width: '16px', height: '16px' }}>
-              <path fill="currentColor" fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clipRule="evenodd" />
-            </svg>
+            <span className="nav-icon">🚪</span>
             <span>Logout</span>
           </button>
         </div>
@@ -146,9 +140,7 @@ export default function Dashboard() {
             <p className="page-subtitle">{activeView === 'chat' ? 'Get instant answers from our knowledge base' : 'View and manage your documents'}</p>
           </div>
           <button onClick={() => setShowUpload(true)} className="btn-upload">
-            <svg viewBox="0 0 20 20" style={{ width: '20px', height: '20px' }}>
-              <path fill="currentColor" fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
-            </svg>
+            <span className="nav-icon">⬆️</span>
             Upload Document
           </button>
         </header>
@@ -268,27 +260,19 @@ export default function Dashboard() {
       <nav className="bottom-nav">
         <div className="bottom-nav-content">
           <button onClick={() => setActiveView('chat')} className={'bottom-nav-item ' + (activeView === 'chat' ? 'active' : '')}>
-            <svg viewBox="0 0 20 20" style={{ width: '24px', height: '24px' }}>
-              <path fill="currentColor" fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
-            </svg>
+            <span className="nav-icon">💬</span>
             <span>Chat</span>
           </button>
           <button onClick={() => setActiveView('documents')} className={'bottom-nav-item ' + (activeView === 'documents' ? 'active' : '')}>
-            <svg viewBox="0 0 20 20" style={{ width: '24px', height: '24px' }}>
-              <path fill="currentColor" fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
-            </svg>
+            <span className="nav-icon">📄</span>
             <span>Docs</span>
           </button>
           <button onClick={() => setShowUpload(true)} className="bottom-nav-item">
-            <svg viewBox="0 0 20 20" style={{ width: '24px', height: '24px' }}>
-              <path fill="currentColor" fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
-            </svg>
+            <span className="nav-icon">⬆️</span>
             <span>Upload</span>
           </button>
           <button onClick={handleLogout} className="bottom-nav-item">
-            <svg viewBox="0 0 20 20" style={{ width: '24px', height: '24px' }}>
-              <path fill="currentColor" fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clipRule="evenodd" />
-            </svg>
+            <span className="nav-icon">🚪</span>
             <span>Logout</span>
           </button>
         </div>
