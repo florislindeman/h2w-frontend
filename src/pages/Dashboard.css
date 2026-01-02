@@ -36,9 +36,7 @@
 }
 
 .nav-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
+  display: block;
   padding: 0.75rem 1rem;
   border-radius: 0.5rem;
   border: none;
@@ -51,15 +49,7 @@
   width: 100%;
   text-align: left;
   margin-bottom: 0.25rem;
-}
-
-.nav-icon {
-  font-size: 1.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
+  line-height: 1.5;
 }
 
 .nav-item:hover {
@@ -88,10 +78,8 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
+  text-align: center;
+  line-height: 1.5;
 }
 
 .logout-btn:hover {
@@ -128,9 +116,6 @@
 }
 
 .btn-upload {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
   padding: 0.75rem 1.5rem;
   background: #0ea5e9;
   color: white;
@@ -139,6 +124,8 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+  font-size: 0.875rem;
+  line-height: 1.5;
 }
 
 .btn-upload:hover {
@@ -472,21 +459,15 @@
   }
   
   .bottom-nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.25rem;
-    padding: 0.5rem 1rem;
+    padding: 0.75rem 1rem;
     border: none;
     background: transparent;
     color: #94a3b8;
     font-size: 0.75rem;
     cursor: pointer;
     flex: 1;
-  }
-  
-  .bottom-nav-item .nav-icon {
-    font-size: 1.5rem;
+    text-align: center;
+    line-height: 1.5;
   }
   
   .bottom-nav-item.active {
