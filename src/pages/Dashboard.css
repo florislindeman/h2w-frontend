@@ -53,6 +53,15 @@
   margin-bottom: 0.25rem;
 }
 
+.nav-icon {
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
 .nav-item:hover {
   background: #f1f5f9;
   color: #0f172a;
@@ -474,6 +483,10 @@
     font-size: 0.75rem;
     cursor: pointer;
     flex: 1;
+  }
+  
+  .bottom-nav-item .nav-icon {
+    font-size: 1.5rem;
   }
   
   .bottom-nav-item.active {
