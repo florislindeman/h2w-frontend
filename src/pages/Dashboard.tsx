@@ -146,9 +146,7 @@ export default function Dashboard() {
             <div className="chat-input-container">
               <form onSubmit={handleAskQuestion} className="chat-form">
                 <div className="chat-input-wrapper">
-                  <svg className="chat-icon" viewBox="0 0 20 20" style={{ width: '24px', height: '24px' }}>
-                    <path fill="currentColor" fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
-                  </svg>
+                  <span className="chat-input-emoji">💬</span>
                   <input
                     type="text"
                     value={question}
@@ -158,16 +156,7 @@ export default function Dashboard() {
                     disabled={loading}
                   />
                   <button type="submit" className="chat-send-btn" disabled={loading}>
-                    {loading ? (
-                      <svg className="spinner-small" viewBox="0 0 24 24" style={{ width: '20px', height: '20px' }}>
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                        <path fill="currentColor" className="opacity-75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                      </svg>
-                    ) : (
-                      <svg viewBox="0 0 20 20" style={{ width: '20px', height: '20px' }}>
-                        <path fill="currentColor" d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-                      </svg>
-                    )}
+                    {loading ? '⏳' : '➤'}
                   </button>
                 </div>
               </form>
@@ -175,9 +164,7 @@ export default function Dashboard() {
 
             {chatHistory.length === 0 ? (
               <div className="empty-state">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                </svg>
+                <div className="empty-state-icon">💬</div>
                 <h3>Start a conversation</h3>
                 <p>Ask me anything about the documents</p>
               </div>
@@ -186,22 +173,14 @@ export default function Dashboard() {
               {chatHistory.map((msg, idx) => (
                 <div key={idx} className="chat-message">
                   <div className="message-question">
-                    <div className="message-icon user-icon">
-                      <svg viewBox="0 0 20 20" style={{ width: '20px', height: '20px' }}>
-                        <path fill="currentColor" fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                      </svg>
-                    </div>
+                    <div className="message-icon user-icon">👤</div>
                     <div className="message-content">
                       <p className="message-text">{msg.question}</p>
                     </div>
                   </div>
 
                   <div className="message-answer">
-                    <div className="message-icon ai-icon">
-                      <svg viewBox="0 0 20 20" style={{ width: '20px', height: '20px' }}>
-                        <path fill="currentColor" fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7z" clipRule="evenodd" />
-                      </svg>
-                    </div>
+                    <div className="message-icon ai-icon">🤖</div>
                     <div className="message-content">
                       <p className="message-text">{msg.answer}</p>
                       <div className="message-meta">
@@ -241,10 +220,7 @@ export default function Dashboard() {
                     </p>
                   </div>
                   <a href={doc.file_url} target="_blank" rel="noopener noreferrer" className="document-action">
-                    <svg viewBox="0 0 20 20" style={{ width: '16px', height: '16px' }}>
-                      <path fill="currentColor" d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
-                      <path fill="currentColor" d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
-                    </svg>
+                    🔗
                   </a>
                 </div>
               ))}
