@@ -1,4 +1,3 @@
-// Force rebuild v2
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UploadModal from './UploadModal';
@@ -117,19 +116,16 @@ export default function Dashboard() {
 
         <nav className="sidebar-nav">
           <button onClick={() => setActiveView('chat')} className={'nav-item ' + (activeView === 'chat' ? 'active' : '')}>
-            <span className="nav-icon">💬</span>
-            <span>Ask Questions</span>
+            💬 Ask Questions
           </button>
           <button onClick={() => setActiveView('documents')} className={'nav-item ' + (activeView === 'documents' ? 'active' : '')}>
-            <span className="nav-icon">📄</span>
-            <span>Documents</span>
+            📄 Documents
           </button>
         </nav>
 
         <div className="sidebar-footer">
           <button onClick={handleLogout} className="logout-btn">
-            <span className="nav-icon">🚪</span>
-            <span>Logout</span>
+            🚪 Logout
           </button>
         </div>
       </aside>
@@ -141,8 +137,7 @@ export default function Dashboard() {
             <p className="page-subtitle">{activeView === 'chat' ? 'Get instant answers from our knowledge base' : 'View and manage your documents'}</p>
           </div>
           <button onClick={() => setShowUpload(true)} className="btn-upload">
-            <span className="nav-icon">⬆️</span>
-            Upload Document
+            ⬆️ Upload Document
           </button>
         </header>
 
@@ -261,20 +256,16 @@ export default function Dashboard() {
       <nav className="bottom-nav">
         <div className="bottom-nav-content">
           <button onClick={() => setActiveView('chat')} className={'bottom-nav-item ' + (activeView === 'chat' ? 'active' : '')}>
-            <span className="nav-icon">💬</span>
-            <span>Chat</span>
+            💬 Chat
           </button>
           <button onClick={() => setActiveView('documents')} className={'bottom-nav-item ' + (activeView === 'documents' ? 'active' : '')}>
-            <span className="nav-icon">📄</span>
-            <span>Docs</span>
+            📄 Docs
           </button>
           <button onClick={() => setShowUpload(true)} className="bottom-nav-item">
-            <span className="nav-icon">⬆️</span>
-            <span>Upload</span>
+            ⬆️ Upload
           </button>
           <button onClick={handleLogout} className="bottom-nav-item">
-            <span className="nav-icon">🚪</span>
-            <span>Logout</span>
+            🚪 Logout
           </button>
         </div>
       </nav>
