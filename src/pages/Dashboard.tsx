@@ -185,7 +185,16 @@ export default function Dashboard() {
               </form>
             </div>
 
-            <div className="chat-history">
+            {chatHistory.length === 0 ? (
+              <div className="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <h3>Start a conversation</h3>
+                <p>Ask me anything about the documents</p>
+              </div>
+            ) : (
+              <div className="chat-history">
               {chatHistory.map((msg, idx) => (
                 <div key={idx} className="chat-message">
                   <div className="message-question">
@@ -227,6 +236,7 @@ export default function Dashboard() {
                 </div>
               ))}
             </div>
+            )}
           </section>
         ) : (
           <section className="documents-section">
