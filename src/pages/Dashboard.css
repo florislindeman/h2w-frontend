@@ -154,6 +154,11 @@
   transition: border 0.2s;
 }
 
+.chat-input-emoji {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
 .chat-input-wrapper:focus-within {
   border-color: #0ea5e9;
 }
@@ -183,6 +188,7 @@
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
+  font-size: 1.25rem;
 }
 
 .chat-send-btn:hover:not(:disabled) {
@@ -213,11 +219,10 @@
   flex: 1;
 }
 
-.empty-state svg {
-  width: 4rem;
-  height: 4rem;
+.empty-state-icon {
+  font-size: 4rem;
   margin-bottom: 1rem;
-  color: #cbd5e1;
+  opacity: 0.5;
 }
 
 .empty-state h3 {
@@ -253,6 +258,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  font-size: 1.25rem;
 }
 
 .user-icon {
@@ -402,6 +408,8 @@
   justify-content: center;
   transition: all 0.2s;
   flex-shrink: 0;
+  text-decoration: none;
+  font-size: 1.25rem;
 }
 
 .document-action:hover {
