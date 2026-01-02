@@ -1,0 +1,255 @@
+/* Additional styling for Dashboard chat functionality using Admin layout */
+
+.chat-section {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 200px);
+  gap: 1.5rem;
+}
+
+.chat-input-container {
+  padding: 0;
+}
+
+.chat-form-admin {
+  width: 100%;
+}
+
+.chat-input-wrapper-admin {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 0.75rem;
+  transition: border 0.2s;
+}
+
+.chat-input-wrapper-admin:focus-within {
+  border-color: #0ea5e9;
+}
+
+.chat-icon-admin {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.chat-input-admin {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 0.875rem;
+  outline: none;
+  color: #0f172a;
+}
+
+.chat-input-admin::placeholder {
+  color: #94a3b8;
+}
+
+.chat-send-btn-admin {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  background: #0ea5e9;
+  color: white;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.chat-send-btn-admin:hover:not(:disabled) {
+  background: #0284c7;
+}
+
+.chat-send-btn-admin:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.chat-send-btn-admin svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.spinner-small {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.empty-state-admin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  color: #64748b;
+  flex: 1;
+}
+
+.empty-state-admin svg {
+  width: 4rem;
+  height: 4rem;
+  margin-bottom: 1rem;
+  color: #cbd5e1;
+}
+
+.empty-state-admin h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0 0 0.5rem 0;
+}
+
+.empty-state-admin p {
+  font-size: 1rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.chat-history-admin {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.chat-message-admin {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.message-question-admin,
+.message-answer-admin {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.message-icon-admin {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.message-icon-admin.user-icon {
+  background: #e0f2fe;
+  color: #0284c7;
+}
+
+.message-icon-admin.ai-icon {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.message-icon-admin svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.message-content-admin {
+  flex: 1;
+  background: white;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid #e2e8f0;
+}
+
+.message-text-admin {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: #0f172a;
+}
+
+.message-meta-admin {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.confidence-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.confidence-badge.high {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.confidence-badge.medium {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.confidence-badge.low {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.sources {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sources-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.source-pill {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  background: #e0f2fe;
+  color: #0369a1;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.source-pill:hover {
+  background: #bae6fd;
+}
+
+@media (max-width: 768px) {
+  .chat-section {
+    height: calc(100vh - 250px);
+  }
+  
+  .chat-input-wrapper-admin {
+    padding: 0.75rem;
+  }
+  
+  .chat-icon-admin {
+    display: none;
+  }
+}
