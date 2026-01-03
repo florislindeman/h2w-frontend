@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UploadModal from './UploadModal';
-import './Dashboard.css';
+import './Admin.css';
 import './DashboardChat.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://h2wchatbot-production.up.railway.app';
