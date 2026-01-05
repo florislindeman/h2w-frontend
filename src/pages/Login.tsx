@@ -104,12 +104,9 @@ export default function Login() {
       localStorage.setItem('user', JSON.stringify(user));
 
       // Role-based redirect
-      if (user.role === 'admin') {
-        console.log('Redirecting to admin...');
-        navigate('/admin');
-      } else {
-        console.log('Redirecting to dashboard...');
-        navigate('/dashboard');
+      // Iedereen naar admin pagina (werkt perfect voor beide rollen)
+console.log('Redirecting to admin...');
+navigate('/admin');
       }
     } catch (err: any) {
       // Ensure error is always a string
