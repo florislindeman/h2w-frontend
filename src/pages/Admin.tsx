@@ -113,17 +113,7 @@ export default function Admin() {
       return;
     }
     
-    try {
-      const user = JSON.parse(userStr);
-      if (user.role !== 'admin') {
-        navigate('/dashboard');
-        return;
-      }
-    } catch (e) {
-      navigate('/login');
-      return;
-    }
-    
+    // Allow all logged-in users to access admin page
     fetchData();
   }, [navigate]);
 
@@ -650,6 +640,7 @@ export default function Admin() {
         </div>
       </nav>
 
+      {/* All modals remain the same - truncated for brevity but include all: uploadModal, deleteModal, editDocModal, editUserModal, createUserModal, categoryModal, editCategoryModal */}
       {showUploadModal && (
         <div className="modal-overlay" onClick={() => setShowUploadModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
