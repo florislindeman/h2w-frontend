@@ -208,7 +208,7 @@ export default function Admin() {
     const token = localStorage.getItem('token');
 
     try {
-      const response = await fetch(`${API_URL}/chat/ask`, {
+      const response = await fetch(`${API_URL}/api/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
