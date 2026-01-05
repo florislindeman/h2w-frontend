@@ -683,7 +683,6 @@ export default function Admin() {
         </div>
       </nav>
 
-      {/* Modals remain the same but I'll include the essential ones */}
       {showUploadModal && isAdmin && (
         <div className="modal-overlay" onClick={() => setShowUploadModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -744,7 +743,199 @@ export default function Admin() {
         </div>
       )}
 
-      {/* Other modals truncated for brevity - include all from original file */}
+      {showDeleteModal && (
+        <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Confirm Delete</h2>
+              <button onClick={() => setShowDeleteModal(false)} className="modal-close">
+                <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+              </button>
+            </div>
+            <div className="modal-body">
+              <div className="delete-modal-content">
+                <div className="delete-icon">
+                  <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
+                </div>
+                <h3>Are you sure?</h3>
+                <p>This action cannot be undone. This will permanently delete the {deleteType}{deleteType === 'document' && ' "' + (deleteTarget?.title || '') + '"'}{deleteType === 'user' && ' "' + (deleteTarget?.full_name || '') + '"'}{deleteType === 'category' && ' "' + (deleteTarget?.name || '') + '"'}.</p>
+              </div>
+            </div>
+            <div className="modal-actions">
+              <button onClick={() => setShowDeleteModal(false)} className="btn-secondary">Cancel</button>
+              <button onClick={handleDelete} className="btn-danger">Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showEditDocModal && selectedDoc && (
+        <div className="modal-overlay" onClick={() => setShowEditDocModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Edit Document Categories</h2>
+              <button onClick={() => setShowEditDocModal(false)} className="modal-close">
+                <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+              </button>
+            </div>
+            <div className="modal-body">
+              <p><strong>Document:</strong> {selectedDoc.title}</p>
+              <div className="form-group">
+                <label className="form-label">Categories</label>
+                {categories.map(cat => (
+                  <label key={cat.id} className="checkbox-label">
+                    <input type="checkbox" checked={docCategoryIds.includes(cat.id)} onChange={(e) => { if (e.target.checked) { setDocCategoryIds([...docCategoryIds, cat.id]); } else { setDocCategoryIds(docCategoryIds.filter(id => id !== cat.id)); } }} />
+                    <span>{cat.name}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div className="modal-actions">
+              <button onClick={() => setShowEditDocModal(false)} className="btn-secondary">Cancel</button>
+              <button onClick={handleUpdateDocumentCategories} className="btn-primary">Save Changes</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showEditUserModal && selectedUser && (
+        <div className="modal-overlay" onClick={() => setShowEditUserModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Edit User</h2>
+              <button onClick={() => setShowEditUserModal(false)} className="modal-close">
+                <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+              </button>
+            </div>
+            <div className="modal-body">
+              <p><strong>User:</strong> {selectedUser.full_name}</p>
+              <div className="form-group">
+                <label className="form-label">Role</label>
+                <select value={editUserRole} onChange={(e) => setEditUserRole(e.target.value)} className="form-input">
+                  <option value="admin">Admin</option>
+                  <option value="manager">Manager</option>
+                  <option value="medewerker">Medewerker</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Categories</label>
+                {categories.map(cat => (
+                  <label key={cat.id} className="checkbox-label">
+                    <input type="checkbox" checked={editUserCategories.includes(cat.id)} onChange={(e) => { if (e.target.checked) { setEditUserCategories([...editUserCategories, cat.id]); } else { setEditUserCategories(editUserCategories.filter(id => id !== cat.id)); } }} />
+                    <span>{cat.name}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div className="modal-actions">
+              <button onClick={() => setShowEditUserModal(false)} className="btn-secondary">Cancel</button>
+              <button onClick={handleUpdateUser} className="btn-primary">Save Changes</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showCreateUserModal && (
+        <div className="modal-overlay" onClick={() => setShowCreateUserModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Create New User</h2>
+              <button onClick={() => setShowCreateUserModal(false)} className="modal-close">
+                <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+              </button>
+            </div>
+            <div className="modal-body">
+              <div className="form-group">
+                <label className="form-label">Full Name</label>
+                <input type="text" value={newUser.full_name} onChange={(e) => setNewUser({...newUser, full_name: e.target.value})} className="form-input" placeholder="Enter full name" />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Email</label>
+                <input type="email" value={newUser.email} onChange={(e) => setNewUser({...newUser, email: e.target.value})} className="form-input" placeholder="Enter email" />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Password</label>
+                <input type="password" value={newUser.password} onChange={(e) => setNewUser({...newUser, password: e.target.value})} className="form-input" placeholder="Enter password" />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Role</label>
+                <select value={newUser.role} onChange={(e) => setNewUser({...newUser, role: e.target.value})} className="form-input">
+                  <option value="medewerker">Medewerker</option>
+                  <option value="manager">Manager</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Categories</label>
+                {categories.map(cat => (
+                  <label key={cat.id} className="checkbox-label">
+                    <input type="checkbox" checked={newUser.category_ids.includes(cat.id)} onChange={(e) => { if (e.target.checked) { setNewUser({...newUser, category_ids: [...newUser.category_ids, cat.id]}); } else { setNewUser({...newUser, category_ids: newUser.category_ids.filter(id => id !== cat.id)}); } }} />
+                    <span>{cat.name}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div className="modal-actions">
+              <button onClick={() => setShowCreateUserModal(false)} className="btn-secondary">Cancel</button>
+              <button onClick={handleCreateUser} className="btn-primary">Create User</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showCategoryModal && (
+        <div className="modal-overlay" onClick={() => setShowCategoryModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Create New Category</h2>
+              <button onClick={() => setShowCategoryModal(false)} className="modal-close">
+                <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+              </button>
+            </div>
+            <div className="modal-body">
+              <div className="form-group">
+                <label className="form-label">Category Name</label>
+                <input type="text" value={newCategory.name} onChange={(e) => setNewCategory({...newCategory, name: e.target.value})} className="form-input" placeholder="Enter category name" />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Description (Optional)</label>
+                <input type="text" value={newCategory.description} onChange={(e) => setNewCategory({...newCategory, description: e.target.value})} className="form-input" placeholder="Enter description" />
+              </div>
+            </div>
+            <div className="modal-actions">
+              <button onClick={() => setShowCategoryModal(false)} className="btn-secondary">Cancel</button>
+              <button onClick={handleCreateCategory} className="btn-primary">Create Category</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showEditCategoryModal && selectedCategory && (
+        <div className="modal-overlay" onClick={() => setShowEditCategoryModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Edit Category</h2>
+              <button onClick={() => setShowEditCategoryModal(false)} className="modal-close">
+                <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+              </button>
+            </div>
+            <div className="modal-body">
+              <div className="form-group">
+                <label className="form-label">Category Name</label>
+                <input type="text" value={editCategoryName} onChange={(e) => setEditCategoryName(e.target.value)} className="form-input" />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Description</label>
+                <input type="text" value={editCategoryDescription} onChange={(e) => setEditCategoryDescription(e.target.value)} className="form-input" />
+              </div>
+            </div>
+            <div className="modal-actions">
+              <button onClick={() => setShowEditCategoryModal(false)} className="btn-secondary">Cancel</button>
+              <button onClick={handleUpdateCategory} className="btn-primary">Save Changes</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
