@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Admin.css';
+import './DashboardChat.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://h2wchatbot-production.up.railway.app';
 
@@ -29,22 +30,31 @@ interface Category {
   description?: string;
 }
 
-interface AuditLog {
-  action: string;
-  details: string;
-  timestamp: Date;
+interface ChatMessage {
+  question: string;
+  answer: string;
+  confidence: number;
+  sources: Array<{
+    document_title: string;
+    document_url: string;
+  }>;
 }
 
-type TabType = 'documents' | 'users' | 'categories';
+type TabType = 'chat' | 'documents' | 'users' | 'categories';
 
 export default function Admin() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<TabType>('documents');
+  const [activeTab, setActiveTab] = useState<TabType>('chat');
   const [documents, setDocuments] = useState<Document[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  
+  // Chat state
+  const [question, setQuestion] = useState('');
+  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
+  const [chatLoading, setChatLoading] = useState(false);
   
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
@@ -87,14 +97,6 @@ export default function Admin() {
   const [editCategoryName, setEditCategoryName] = useState('');
   const [editCategoryDescription, setEditCategoryDescription] = useState('');
 
-  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
-
-  const addAuditLog = (action: string, details: string) => {
-    const log: AuditLog = { action, details, timestamp: new Date() };
-    setAuditLogs(prev => [log, ...prev].slice(0, 50));
-    console.log('[AUDIT]', action, ':', details);
-  };
-
   const checkAuth = (response: Response) => {
     if (response.status === 401) {
       localStorage.removeItem('token');
@@ -102,7 +104,6 @@ export default function Admin() {
       navigate('/login');
       return false;
     }
-    // Don't logout on 403 - user just doesn't have permission for that specific resource
     return true;
   };
 
@@ -140,7 +141,6 @@ export default function Admin() {
       const user = JSON.parse(userStr);
       const userIsAdmin = user.role === 'admin';
       
-      // Always fetch documents (all users can see documents)
       try {
         const docsRes = await fetch(API_URL + '/api/documents/', {
           headers: { 
@@ -158,7 +158,6 @@ export default function Admin() {
         console.error('Error fetching documents:', error);
       }
 
-      // Only fetch users and categories if admin
       if (userIsAdmin) {
         try {
           const usersRes = await fetch(API_URL + '/api/users/', {
@@ -194,12 +193,45 @@ export default function Admin() {
           console.error('Error fetching categories:', error);
         }
       }
-      
-      addAuditLog('DATA_FETCH', 'Loaded data');
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAskQuestion = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!question.trim()) return;
+
+    setChatLoading(true);
+    const token = localStorage.getItem('token');
+
+    try {
+      const response = await fetch(`${API_URL}/chat/ask`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ question }),
+      });
+
+      const data = await response.json();
+      setChatHistory([
+        { 
+          question, 
+          answer: data.answer, 
+          confidence: data.confidence,
+          sources: data.sources || []
+        },
+        ...chatHistory
+      ]);
+      setQuestion('');
+    } catch (error) {
+      console.error('Error asking question:', error);
+    } finally {
+      setChatLoading(false);
     }
   };
 
@@ -439,7 +471,13 @@ export default function Admin() {
           </div>
         </div>
         <nav className="sidebar-nav">
-          <button onClick={() => setActiveTab('documents')} className={'nav-item ' + (activeTab === 'documents' ? 'active' : '')}>
+          <button onClick={() => setActiveTab('chat')} className={`nav-item ${activeTab === 'chat' ? 'active' : ''}`}>
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
+            </svg>
+            <span>Ask Questions</span>
+          </button>
+          <button onClick={() => setActiveTab('documents')} className={`nav-item ${activeTab === 'documents' ? 'active' : ''}`}>
             <svg viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
             </svg>
@@ -448,14 +486,14 @@ export default function Admin() {
           </button>
           {isAdmin && (
             <>
-              <button onClick={() => setActiveTab('users')} className={'nav-item ' + (activeTab === 'users' ? 'active' : '')}>
+              <button onClick={() => setActiveTab('users')} className={`nav-item ${activeTab === 'users' ? 'active' : ''}`}>
                 <svg viewBox="0 0 20 20" fill="currentColor">
                   <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
                 </svg>
                 <span>Users</span>
                 <span className="badge">{users.length}</span>
               </button>
-              <button onClick={() => setActiveTab('categories')} className={'nav-item ' + (activeTab === 'categories' ? 'active' : '')}>
+              <button onClick={() => setActiveTab('categories')} className={`nav-item ${activeTab === 'categories' ? 'active' : ''}`}>
                 <svg viewBox="0 0 20 20" fill="currentColor">
                   <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
                 </svg>
@@ -479,11 +517,13 @@ export default function Admin() {
         <header className="admin-header">
           <div>
             <h1 className="admin-title">
+              {activeTab === 'chat' && 'Ask Questions'}
               {activeTab === 'documents' && 'Document Management'}
               {activeTab === 'users' && 'User Management'}
               {activeTab === 'categories' && 'Category Management'}
             </h1>
             <p className="admin-subtitle">
+              {activeTab === 'chat' && 'Get instant answers from our knowledge base'}
               {activeTab === 'documents' && 'View and manage all documents'}
               {activeTab === 'users' && 'Manage user roles and permissions'}
               {activeTab === 'categories' && 'Organize content with categories'}
@@ -522,6 +562,96 @@ export default function Admin() {
           </div>
         ) : (
           <>
+            {activeTab === 'chat' && (
+              <div className="chat-section">
+                <div className="chat-input-container">
+                  <form onSubmit={handleAskQuestion} className="chat-form-admin">
+                    <div className="chat-input-wrapper-admin">
+                      <svg className="chat-icon-admin" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
+                      </svg>
+                      <input
+                        type="text"
+                        value={question}
+                        onChange={(e) => setQuestion(e.target.value)}
+                        placeholder="Ask me anything about the documents..."
+                        className="chat-input-admin"
+                        disabled={chatLoading}
+                      />
+                      <button type="submit" className="chat-send-btn-admin" disabled={chatLoading}>
+                        {chatLoading ? (
+                          <div className="spinner-small"></div>
+                        ) : (
+                          <svg viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                          </svg>
+                        )}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+
+                {chatHistory.length === 0 ? (
+                  <div className="empty-state">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <h3>Start a conversation</h3>
+                    <p>Ask me anything about the documents</p>
+                  </div>
+                ) : (
+                  <div className="chat-history-admin">
+                    {chatHistory.map((msg, idx) => (
+                      <div key={idx} className="chat-message-admin">
+                        <div className="message-question-admin">
+                          <div className="message-icon-admin user-icon">
+                            <svg viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                          <div className="message-content-admin">
+                            <p className="message-text-admin">{msg.question}</p>
+                          </div>
+                        </div>
+
+                        <div className="message-answer-admin">
+                          <div className="message-icon-admin ai-icon">
+                            <svg viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                          <div className="message-content-admin">
+                            <p className="message-text-admin">{msg.answer}</p>
+                            <div className="message-meta-admin">
+                              <span className={`confidence-badge ${msg.confidence > 70 ? 'high' : msg.confidence > 40 ? 'medium' : 'low'}`}>
+                                {msg.confidence}% confidence
+                              </span>
+                              {msg.sources.length > 0 && (
+                                <div className="sources">
+                                  <span className="sources-label">Sources:</span>
+                                  {msg.sources.map((source, i) => (
+                                    <a 
+                                      key={i} 
+                                      href={source.document_url} 
+                                      target="_blank" 
+                                      rel="noopener noreferrer" 
+                                      className="source-pill"
+                                    >
+                                      {source.document_title}
+                                    </a>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             {activeTab === 'documents' && (
               <div className="admin-table-container">
                 <table className="admin-table">
@@ -640,35 +770,25 @@ export default function Admin() {
             )}
           </>
         )}
-        <div className="audit-log-section">
-          <h3 className="audit-log-title">Recent Activity</h3>
-          <div className="audit-log-list">
-            {auditLogs.slice(0, 5).map((log, index) => (
-              <div key={index} className="audit-log-item">
-                <span className="audit-action">{log.action}</span>
-                <span className="audit-details">{log.details}</span>
-                <span className="audit-time">{log.timestamp.toLocaleTimeString()}</span>
-              </div>
-            ))}
-            {auditLogs.length === 0 && (
-              <div className="audit-log-empty">No recent activity</div>
-            )}
-          </div>
-        </div>
       </main>
+
       <nav className="bottom-nav">
         <div className="bottom-nav-content">
-          <button onClick={() => setActiveTab('documents')} className={'bottom-nav-item ' + (activeTab === 'documents' ? 'active' : '')}>
+          <button onClick={() => setActiveTab('chat')} className={`bottom-nav-item ${activeTab === 'chat' ? 'active' : ''}`}>
+            <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" /></svg>
+            <span>Chat</span>
+          </button>
+          <button onClick={() => setActiveTab('documents')} className={`bottom-nav-item ${activeTab === 'documents' ? 'active' : ''}`}>
             <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" /></svg>
             <span>Docs</span>
           </button>
           {isAdmin && (
             <>
-              <button onClick={() => setActiveTab('users')} className={'bottom-nav-item ' + (activeTab === 'users' ? 'active' : '')}>
+              <button onClick={() => setActiveTab('users')} className={`bottom-nav-item ${activeTab === 'users' ? 'active' : ''}`}>
                 <svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" /></svg>
                 <span>Users</span>
               </button>
-              <button onClick={() => setActiveTab('categories')} className={'bottom-nav-item ' + (activeTab === 'categories' ? 'active' : '')}>
+              <button onClick={() => setActiveTab('categories')} className={`bottom-nav-item ${activeTab === 'categories' ? 'active' : ''}`}>
                 <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" /></svg>
                 <span>Cats</span>
               </button>
@@ -681,6 +801,7 @@ export default function Admin() {
         </div>
       </nav>
 
+      {/* Modal voor document upload, delete, edit, etc blijven hetzelfde */}
       {showUploadModal && isAdmin && (
         <div className="modal-overlay" onClick={() => setShowUploadModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
