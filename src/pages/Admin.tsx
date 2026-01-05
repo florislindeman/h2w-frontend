@@ -44,7 +44,6 @@ export default function Admin() {
   const [users, setUsers] = useState<User[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   
   const [searchTerm, setSearchTerm] = useState('');
@@ -118,7 +117,6 @@ export default function Admin() {
     
     try {
       const user = JSON.parse(userStr);
-      setCurrentUser(user);
       setIsAdmin(user.role === 'admin');
     } catch (e) {
       navigate('/login');
