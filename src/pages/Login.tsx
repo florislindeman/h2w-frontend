@@ -103,11 +103,10 @@ export default function Login() {
       localStorage.setItem('token', data.access_token);
       localStorage.setItem('user', JSON.stringify(user));
 
-      // Role-based redirect
       // Iedereen naar admin pagina (werkt perfect voor beide rollen)
-console.log('Redirecting to admin...');
-navigate('/admin');
-      }
+      console.log('Redirecting to admin...');
+      navigate('/admin');
+
     } catch (err: any) {
       // Ensure error is always a string
       const errorMessage = err.message || 'An unexpected error occurred. Please try again.';
